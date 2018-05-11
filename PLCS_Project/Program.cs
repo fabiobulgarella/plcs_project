@@ -1,4 +1,6 @@
-﻿using System;
+﻿//PLCS project
+
+using System;
 using System.Collections;
 using System.Threading;
 using Microsoft.SPOT;
