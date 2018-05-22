@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections;
+using System.Net;
 using System.Threading;
 using System.Reflection;
+
 using Microsoft.SPOT;
 using Microsoft.SPOT.IO;
 using Microsoft.SPOT.Presentation;
@@ -12,7 +14,6 @@ using Microsoft.SPOT.Presentation.Controls;
 using Microsoft.SPOT.Presentation.Media;
 using Microsoft.SPOT.Presentation.Shapes;
 using Microsoft.SPOT.Touch;
-using Microsoft.SPOT.Net;
 using Microsoft.SPOT.Time;
 
 using Gadgeteer.Networking;
@@ -101,7 +102,7 @@ namespace PLCS_Project
         }
 
         void ethernetJ11D_NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
-        {
+        {/*
             Debug.Print("Network is Up");
 
             TimeServiceSettings settings = new TimeServiceSettings();
@@ -111,9 +112,9 @@ namespace PLCS_Project
             TimeService.SystemTimeChanged += TimeService_SystemTimeChanged;
             TimeService.TimeSyncFailed += TimeService_TimeSyncFailed;
             TimeService.SetTimeZoneOffset(60);
-                        
+
             IPHostEntry hostEntry = Dns.GetHostEntry("time.nist.gov");
-            IPAddress address = hostEntry.AddressList;
+            IPAddress[] address = hostEntry.AddressList;
 
             if (address != null)
                 settings.PrimaryServer = address[0].GetAddressBytes();
@@ -125,7 +126,7 @@ namespace PLCS_Project
                 settings.AlternateServer = address[0].GetAddressBytes();
 
             TimeService.Settings = settings;
-            TimeService.Start();
+            TimeService.Start();*/
         }
 
         void ethernetJ11D_NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
