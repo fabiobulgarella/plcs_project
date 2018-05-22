@@ -7,7 +7,7 @@ namespace PLCS_Project
 {
     static class Utils
     {
-        private static const String device_id = "FEZ_49";
+        private const String device_id = "FEZ_49";
 
         public static void PrintVolumeInfo(VolumeInfo volume)
         {

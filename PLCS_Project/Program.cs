@@ -26,8 +26,11 @@ namespace PLCS_Project
     public partial class Program
     {
         private BME280Device bme280;
-        private Mouse mouse;
-        private bool[] isLightedLed;
+        private Mouse mouse;        
+        private bool sdCardMounted = false;
+        private bool mouseMounted = false;
+        private bool bme280Mounted = false;
+        private bool ethernetMounted = false;
 
         double tempC, pressureMb, relativeHumidity;
 
@@ -35,8 +38,7 @@ namespace PLCS_Project
         {
             Debug.Print("Program Started");
 
-            // Setup leds
-            this.isLightedLed = new bool[7];
+            // Setup leds            
             this.ledStrip.TurnAllLedsOff();
 
             // Setup mouse position reset button button
@@ -52,7 +54,7 @@ namespace PLCS_Project
 
             // Setup sdcard
             this.sdCard.Mounted += sdCard_Mounted;
-            this.sdCard.Unmounted += sdCard_Unmounted;
+            this.sdCard.Unmounted += sdCard_Unmounted;                                                
 
             // Setup bosch bme280 sensor
             bme280 = new BME280Device(0x76)
@@ -77,7 +79,7 @@ namespace PLCS_Project
             sensorTimer.Start();
 
             // Writing Timer
-            GT.Timer writingTimer = new GT.Timer(120000);
+            GT.Timer writingTimer = new GT.Timer(10000);   //120000
             writingTimer.Tick += writingTimer_Tick;
             writingTimer.Start();
 
@@ -101,7 +103,7 @@ namespace PLCS_Project
         }
 
         void ethernetJ11D_NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
-        {
+        {/*
             Debug.Print("Network is Up");
 
             TimeServiceSettings settings = new TimeServiceSettings();
@@ -125,7 +127,7 @@ namespace PLCS_Project
                 settings.AlternateServer = address[0].GetAddressBytes();
 
             TimeService.Settings = settings;
-            TimeService.Start();
+            TimeService.Start();*/
         }
 
         void ethernetJ11D_NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
@@ -147,11 +149,15 @@ namespace PLCS_Project
         {
             Debug.Print("SDCard has been Mounted");
             Utils.PrintVolumeInfo(this.sdCard.StorageDevice.Volume);
+            sdCardMounted = true;
+            this.ledStrip.TurnLedOn(2);                
         }
 
         void sdCard_Unmounted(SDCard sender, EventArgs e)
         {
             Debug.Print("SDCard has been Unmounted");
+            sdCardMounted = false;
+//            this.ledStrip.TurnLedOff(2);                
         }
 
         void mouseTimer_Tick(GT.Timer timer)
@@ -184,7 +190,21 @@ namespace PLCS_Project
 
         void writingTimer_Tick(GT.Timer timer)
         {
+            if (this.sdCard.IsCardMounted)
+            {
+                sdCardMounted = true;
+                this.ledStrip.TurnLedOn(2);
+                string test1 = "Number of element into the SD:" + this.sdCard.StorageDevice.ListDirectories(this.sdCard.StorageDevice.RootDirectory).Length.ToString();
+                string test2 = "Root string:" + this.sdCard.StorageDevice.RootDirectory;
+                this.displayTE35.SimpleGraphics.DisplayText(test1, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 140);
+                this.displayTE35.SimpleGraphics.DisplayText(test2, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 160);
 
+                if (this.sdCard.StorageDevice.ListDirectories(this.sdCard.StorageDevice.RootDirectory).Length == 1)
+                {
+                    this.sdCard.StorageDevice.CreateDirectory(this.sdCard.StorageDevice.RootDirectory + "/00_ToSend");
+                    this.sdCard.StorageDevice.CreateDirectory(this.sdCard.StorageDevice.RootDirectory + "/01_Sent");
+                }
+            }
         }
     }
 }
