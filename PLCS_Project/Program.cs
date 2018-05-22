@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections;
+using System.Net;
 using System.Threading;
 using System.Reflection;
+
 using Microsoft.SPOT;
 using Microsoft.SPOT.IO;
 using Microsoft.SPOT.Presentation;
@@ -12,7 +14,6 @@ using Microsoft.SPOT.Presentation.Controls;
 using Microsoft.SPOT.Presentation.Media;
 using Microsoft.SPOT.Presentation.Shapes;
 using Microsoft.SPOT.Touch;
-using Microsoft.SPOT.Net;
 using Microsoft.SPOT.Time;
 
 using Gadgeteer.Networking;
@@ -113,9 +114,9 @@ namespace PLCS_Project
             TimeService.SystemTimeChanged += TimeService_SystemTimeChanged;
             TimeService.TimeSyncFailed += TimeService_TimeSyncFailed;
             TimeService.SetTimeZoneOffset(60);
-                        
+
             IPHostEntry hostEntry = Dns.GetHostEntry("time.nist.gov");
-            IPAddress address = hostEntry.AddressList;
+            IPAddress[] address = hostEntry.AddressList;
 
             if (address != null)
                 settings.PrimaryServer = address[0].GetAddressBytes();
