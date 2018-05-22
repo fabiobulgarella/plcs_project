@@ -104,6 +104,8 @@
     <Reference Include="Microsoft.SPOT.IO" />
     <Reference Include="Microsoft.SPOT.Native" />
     <Reference Include="Microsoft.SPOT.Net" />
+    <Reference Include="Microsoft.SPOT.Net.Security" />
+    <Reference Include="Microsoft.SPOT.Time" />
     <Reference Include="Microsoft.SPOT.TinyCore" />
     <Reference Include="mscorlib" />
     <Reference Include="System.IO" />

@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Threading;
+using System.Reflection;
 using Microsoft.SPOT;
 using Microsoft.SPOT.IO;
 using Microsoft.SPOT.Presentation;
@@ -11,13 +12,14 @@ using Microsoft.SPOT.Presentation.Controls;
 using Microsoft.SPOT.Presentation.Media;
 using Microsoft.SPOT.Presentation.Shapes;
 using Microsoft.SPOT.Touch;
+using Microsoft.SPOT.Net;
+using Microsoft.SPOT.Time;
 
 using Gadgeteer.Networking;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
 using Gadgeteer.Modules.GHIElectronics;
 using GHI.Usb.Host;
-using System.Reflection;
 
 namespace PLCS_Project
 {
@@ -69,9 +71,15 @@ namespace PLCS_Project
             mouseTimer.Tick += mouseTimer_Tick;
             mouseTimer.Start();
 
+            // Sensor Timer
             GT.Timer sensorTimer = new GT.Timer(30000);
             sensorTimer.Tick += sensorTimer_Tick;
             sensorTimer.Start();
+
+            // Writing Timer
+            GT.Timer writingTimer = new GT.Timer(120000);
+            writingTimer.Tick += writingTimer_Tick;
+            writingTimer.Start();
 
             // Show first bme280 reading
             sensorTimer_Tick(null);
@@ -95,11 +103,44 @@ namespace PLCS_Project
         void ethernetJ11D_NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
             Debug.Print("Network is Up");
+
+            TimeServiceSettings settings = new TimeServiceSettings();
+            settings.RefreshTime = 10; // every 10 seconds
+            settings.ForceSyncAtWakeUp = true;
+
+            TimeService.SystemTimeChanged += TimeService_SystemTimeChanged;
+            TimeService.TimeSyncFailed += TimeService_TimeSyncFailed;
+            TimeService.SetTimeZoneOffset(60);
+                        
+            IPHostEntry hostEntry = Dns.GetHostEntry("time.nist.gov");
+            IPAddress address = hostEntry.AddressList;
+
+            if (address != null)
+                settings.PrimaryServer = address[0].GetAddressBytes();
+
+            hostEntry = Dns.GetHostEntry("time.windows.com");
+            address = hostEntry.AddressList;
+
+            if (address != null)
+                settings.AlternateServer = address[0].GetAddressBytes();
+
+            TimeService.Settings = settings;
+            TimeService.Start();
         }
 
         void ethernetJ11D_NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
             Debug.Print("Network is Down");
+        }
+
+        void TimeService_TimeSyncFailed(object sender, TimeSyncFailedEventArgs e)
+        {
+            Debug.Print("DateTime Sync Failed");
+        }
+
+        void TimeService_SystemTimeChanged(object sender, SystemTimeChangedEventArgs e)
+        {
+            Debug.Print("DateTime = " + DateTime.Now.ToString());
         }
 
         void sdCard_Mounted(SDCard sender, GT.StorageDevice device)
@@ -139,6 +180,11 @@ namespace PLCS_Project
             this.displayTE35.SimpleGraphics.DisplayText(pressure, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 90);
             this.displayTE35.SimpleGraphics.DisplayText(humidity, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 107);
             this.displayTE35.SimpleGraphics.Redraw();
+        }
+
+        void writingTimer_Tick(GT.Timer timer)
+        {
+
         }
     }
 }
