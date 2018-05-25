@@ -1,14 +1,14 @@
 using System;
+using System.Reflection;
 using Microsoft.SPOT;
-
+using Microsoft.SPOT.Hardware;
 using GHI.Usb.Host;
 using GHI.Usb.Descriptors;
-using Microsoft.SPOT.Hardware;
-using System.Reflection;
+
 
 namespace PLCS_Project
 {
-    class Mouse : RawDevice
+    public class Mouse : RawDevice
     {
         private const double dotMillimeters = 322.83464566929138;
         
@@ -63,7 +63,7 @@ namespace PLCS_Project
                 catch (Exception)
                 {
                     ExceptionCounter++;
-                    Debug.Print("Input Error: " + Controller.GetLastError().ToString());
+                    //Debug.Print("Input Error: " + Controller.GetLastError().ToString());
                 }
 
                 if (bytesReceived == 7)
@@ -75,26 +75,26 @@ namespace PLCS_Project
             }
         }
 
-        public string GetMillimeterX()
+        public string GetMillimetersX()
         {
-            double millimeterX = X / dotMillimeters;
-            return millimeterX.ToString("F3");
+            double millimetersX = X / dotMillimeters;
+            return millimetersX.ToString("F3");
         }
 
-        public string GetMillimeterY()
+        public string GetMillimetersY()
         {
-            double millimeterY = Y / dotMillimeters;
-            return millimeterY.ToString("F3");
+            double millimetersY = Y / dotMillimeters;
+            return millimetersY.ToString("F3");
         }
 
-        public string GetPosition()
+        public string GetStringPosition()
         {
             return "DPI ->  X: " + X.ToString() + "   Y: " + Y.ToString();
         }
 
-        public string GetMillimeterPosition()
+        public string GetStringMillimetersPosition()
         {
-            return "mm ->  X: " + GetMillimeterX() + "   Y: " + GetMillimeterY();
+            return "mm ->  X: " + GetMillimetersX() + "   Y: " + GetMillimetersY();
         }
 
         public void SetPosition(int x, int y)

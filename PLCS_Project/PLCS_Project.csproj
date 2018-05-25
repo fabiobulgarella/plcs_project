@@ -40,6 +40,7 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="BME280Device.cs" />
+    <Compile Include="Display.cs" />
     <Compile Include="Json.cs" />
     <Compile Include="Mouse.cs" />
     <Compile Include="Program.generated.cs">
@@ -130,4 +131,5 @@
     <None Include="Resources\NinaB.tinyfnt" />
     <None Include="Resources\small.tinyfnt" />
   </ItemGroup>
+  <ItemGroup />
 </Project>
