@@ -99,7 +99,7 @@ namespace PLCS_Project
                 }
                 catch (BME280Exception)
                 {
-                    Debug.Print("Error during BME280 initiliazation");
+                    Debug.Print("Error during BME280 initiliazation");                    
                 }
 
                 Thread.Sleep(5000);
@@ -216,10 +216,6 @@ namespace PLCS_Project
             {
                 sdCardMounted = true;
                 this.ledStrip.TurnLedOn(2);
-                string test1 = "Number of element into the SD:" + this.sdCard.StorageDevice.ListDirectories(this.sdCard.StorageDevice.RootDirectory).Length.ToString();
-                string test2 = "Root string:" + this.sdCard.StorageDevice.RootDirectory;
-                this.displayTE35.SimpleGraphics.DisplayText(test1, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 140);
-                this.displayTE35.SimpleGraphics.DisplayText(test2, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 160);
 
                 if (this.sdCard.StorageDevice.ListDirectories(this.sdCard.StorageDevice.RootDirectory).Length == 1)
                 {
@@ -228,7 +224,12 @@ namespace PLCS_Project
                 }
 
                 byte[] data = Json.CreateJsonMeasurements(mouse.GetMillimetersX(), mouse.GetMillimetersY(), tempC, pressureMb, relativeHumidity);
-                this.sdCard.StorageDevice.WriteFile("00_ToSend\\test1.json", data);
+                string filePath = "00_ToSend\\" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss"+"+00:00") + ".json";                
+                display.UpdateDateTime();                
+                this.displayTE35.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 140, 320, 18);
+                this.displayTE35.SimpleGraphics.DisplayText(filePath, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 140);
+                this.displayTE35.SimpleGraphics.Redraw();
+                this.sdCard.StorageDevice.WriteFile(filePath, data);
             }
         }
     }
