@@ -93,6 +93,7 @@ namespace PLCS_Project
             if (!timeSynchronized)
             {
                 SyncTimeOffset = TimeService.LastSyncStatus.SyncTimeOffset;
+                Debug.Print(SyncTimeOffset.ToString());
             }
 
             timeSynchronized = true;

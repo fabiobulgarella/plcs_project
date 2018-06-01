@@ -102,12 +102,12 @@ namespace PLCS_Project
             int nowIndex = 0;
             while (true)
             {
-                index = oldJson.IndexOf("iso_timestamp", index);
+                index = oldJson.IndexOf("iso_timestamp", index+1);
                 if (index == -1) break;
 
                 newJson.Append(oldJson, nowIndex, index - nowIndex + 17);
                 newJson.Append(new DateTime(newTimestamp).ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00") + "\"");
-                nowIndex += index + 43;
+                nowIndex = index + 43;
             }
 
             newJson.Append(oldJson, nowIndex, oldJson.Length - nowIndex);

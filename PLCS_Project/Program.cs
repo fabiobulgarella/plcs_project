@@ -212,13 +212,12 @@ namespace PLCS_Project
             byte[] data = Json.CreateJsonMeasurements(mouse.GetMillimetersX(), mouse.GetMillimetersY(), tempC, pressureMb, relativeHumidity);
             long numberOfTicks = DateTime.UtcNow.Ticks;
             string fileName = "" + numberOfTicks;            
-            Debug.Print("The file: " + fileName + " has been written");          
+            //Debug.Print("The file: " + fileName + " has been written");          
             if (!Time.IsTimeSynchronized)
                 fileName += "_notSynch";            
-            SDMemoryCard.writeFile(fileName, data);
+            //SDMemoryCard.writeFile(fileName, data);
 
-            if(!Time.IsTimeSynchronized)
-                SDMemoryCard.renameUnsynchFile(fileName);
+            SDMemoryCard.renameUnsynchFile("129513600287878872_notSynch");
             
             /*SDMemoryCard.deleteFile(fileName);
             Debug.Print("The file: " + fileName + " has been deleted");   */

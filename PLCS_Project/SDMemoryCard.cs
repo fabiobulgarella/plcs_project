@@ -1,3 +1,4 @@
+using System.Threading;
 using System;
 using Microsoft.SPOT;
 using Gadgeteer.Modules.GHIElectronics;
@@ -30,12 +31,16 @@ namespace PLCS_Project
 
         public static string renameUnsynchFile(string fileName)
         {
-            long offset = 100;                                                              // TO UPDATE WITH THE METHOD Time.offset
+            Thread.Sleep(5000);
+            long offset = 0;
+            if(Time.IsTimeSynchronized)
+                            offset = Time.SyncTimeOffset;
+            Debug.Print(offset.ToString());
             long notSynchDate = long.Parse(fileName.Split('_')[0]);
             long synchDate = notSynchDate + offset;                                      
             string newFileName = synchDate.ToString() + ".json";
             byte[] unsynchFile = sdCard.StorageDevice.ReadFile(fileName + ".json");
-            byte[] synchFile = unsynchFile;                                                // TO UPDATE WITH THE METHOD Json.
+            byte[] synchFile = Json.ChangeTimestamps(unsynchFile,synchDate);                                             
             sdCard.StorageDevice.WriteFile(newFileName, synchFile);
             sdCard.StorageDevice.Delete(fileName + ".json");
             return newFileName;
