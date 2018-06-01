@@ -390,18 +390,33 @@ namespace PLCS_Project
         public BME280Device(ushort slaveAddress, int frequencykHz = 100)
         {
             Device = null;
+
             if (slaveAddress < kMinValidAddress || slaveAddress > kMaxValidAddress)
                 throw new BME280Exception("Slave address out of range of 0x76-0x77.");
             if (frequencykHz < kMinFrequencyKhz || frequencykHz > kMaxFrequencyKhz)
                 throw new BME280Exception("Clock frequency out of range.");
-            try { Device = new I2CDevice(new I2CDevice.Configuration(slaveAddress, frequencykHz)); }
-            catch (Exception ex) { throw new BME280Exception("I2CDevice constructor failed.", ex); }
-            // Validate that this is a BME280 chip
-            ValidateChipID();
-            // Reset Chip
-            ChipSoftReset();
-            // Make a one-time read of the calibration data
-            GetCalibrationData();
+
+            try
+            { 
+                Device = new I2CDevice(new I2CDevice.Configuration(slaveAddress, frequencykHz));
+
+                // Validate that this is a BME280 chip
+                ValidateChipID();
+                // Reset Chip
+                ChipSoftReset();
+                // Make a one-time read of the calibration data
+                GetCalibrationData();
+            }
+            catch (Exception ex)
+            {
+                if (Device != null)
+                    Device.Dispose();
+
+                if (ex is BME280Exception)
+                    throw ex;
+                else
+                    throw new BME280Exception("I2CDevice constructor failed.", ex);
+            }
 
             // Initialize the altitude (through feet)
             AltitudeInFeet = 0F;

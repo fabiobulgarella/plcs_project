@@ -4,6 +4,7 @@ using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using GHI.Usb.Host;
 using GHI.Usb.Descriptors;
+using System.Collections;
 
 
 namespace PLCS_Project
@@ -20,8 +21,9 @@ namespace PLCS_Project
         private RawDevice.Pipe inputPipe;
         private byte[] inputData;
 
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        public static bool neverConnected = true;
+        public static int X { get; private set; }
+        public static int Y { get; private set; }
         public int ExceptionCounter { get; private set; }
         public bool HasMoved { get; set; }
 
@@ -29,7 +31,11 @@ namespace PLCS_Project
 
         public Mouse(uint id, byte interfaceIndex, ushort vendorId, ushort productId, byte portNumber, DeviceType deviceType) : base(id, interfaceIndex, vendorId, productId, portNumber, deviceType)
         {
-            X = Y = 0;
+            if (neverConnected)
+            {
+                X = Y = 0;
+                neverConnected = false;
+            }
             ExceptionCounter = 0;
             HasMoved = true;
             transferMethod = typeof(RawDevice.Pipe).GetMethod("NativeTransfer", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -108,24 +114,20 @@ namespace PLCS_Project
             X = Y = 0;
         }
 
-        private void PrintInterfaceInfo(Interface i)
+        public static void CleanGhiMouse()
         {
-            Debug.Print("");
-            Debug.Print("Interface Index:  " + i.Index);
-            Debug.Print("Interface Number:  " + i.Number);
-            Debug.Print("Class Code: " + i.ClassCode);
-            Debug.Print("Subclass Code: " + i.SubclassCode);
-            Debug.Print("Number Endpoints: " + i.NumberEndpoints);
-            Debug.Print("Protocol Code:  " + i.ProtocolCode);
-        }
+            FieldInfo devices = typeof(Controller).GetField("devices", BindingFlags.NonPublic | BindingFlags.Static);
+            FieldInfo listLock = typeof(Controller).GetField("listLock", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo onDisconnected = typeof(BaseDevice).GetMethod("OnDisconnected", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private void PrintAuxiliaryDescriptors(Auxiliary[] auxiliaryDescriptors)
-        {
-            foreach (Auxiliary aux in auxiliaryDescriptors)
+            lock (listLock.GetValue(null))
             {
-                Debug.Print("");
-                Debug.Print("Auxiliary Type: " + aux.Type);
-                Debug.Print("Auxiliary Payload: " + aux.Payload.ToString());
+                foreach (BaseDevice device in (ArrayList)devices.GetValue(null))
+                {
+                    onDisconnected.Invoke(device, null);
+                    device.Dispose();
+                }
+                ((ArrayList)devices.GetValue(null)).Clear();
             }
         }
     }

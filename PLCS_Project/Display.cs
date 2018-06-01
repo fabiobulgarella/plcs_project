@@ -5,43 +5,71 @@ using GT = Gadgeteer;
 
 namespace PLCS_Project
 {
-    class Display
+    static class Display
     {
-        private DisplayTE35 display;
+        private static DisplayTE35 display;
 
-        public Display(DisplayTE35 display)
+        public static void setDisplay(DisplayTE35 displayObject)
         {
-            this.display = display;
+            display = displayObject;
+            display.SimpleGraphics.AutoRedraw = false;
+            PrintHeader();
         }
 
-        public void UpdateSensorData(double tempC, double pressureMb, double relativeHumidity)
+        private static void PrintHeader()
+        {
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 0, 320, 18);
+            display.SimpleGraphics.DisplayText("FEZ_49 Group", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 0);
+            display.SimpleGraphics.DisplayText("TS", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 265, 0);
+            display.SimpleGraphics.DisplayText("E", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 290, 0);
+            display.SimpleGraphics.DisplayText("W", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 305, 0);
+            display.SimpleGraphics.Redraw();
+        }
+
+        public static void UpdateTimeStatus(bool synchronized)
+        {
+            GT.Color color = synchronized ? GT.Color.Green : GT.Color.Red;
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 265, 0, 25, 25);
+            display.SimpleGraphics.DisplayText("TS", Resources.GetFont(Resources.FontResources.NinaB), color, 265, 0);
+            display.SimpleGraphics.Redraw();
+        }
+
+        public static void UpdateEtherStatus(bool active)
+        {
+            GT.Color color = active ? GT.Color.Green : GT.Color.Red;
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 290, 0, 15, 15);
+            display.SimpleGraphics.DisplayText("E", Resources.GetFont(Resources.FontResources.NinaB), color, 290, 0);
+            display.SimpleGraphics.Redraw();
+        }
+
+        public static void UpdateWifiStatus(bool active)
+        {
+            GT.Color color = active ? GT.Color.Green : GT.Color.Red;
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 305, 0, 15, 15);
+            display.SimpleGraphics.DisplayText("W", Resources.GetFont(Resources.FontResources.NinaB), color, 305, 0);
+            display.SimpleGraphics.Redraw();
+        }
+
+        public static void UpdateSensorData(double tempC, double pressureMb, double relativeHumidity)
         {
             string temp = "Temperature: " + tempC.ToString("F2") + " C°";
             string pressure = "Pressure: " + pressureMb.ToString("F2") + " mBar";
             string humidity = "Relative Humidity: " + relativeHumidity.ToString("F2") + " %";
-            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 0, 240, 36);
-            display.SimpleGraphics.DisplayText(temp, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 0);
-            display.SimpleGraphics.DisplayText(pressure, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 18);
-            display.SimpleGraphics.DisplayText(humidity, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 36);
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 18, 320, 54);
+            display.SimpleGraphics.DisplayText(temp, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 18);
+            display.SimpleGraphics.DisplayText(pressure, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 36);
+            display.SimpleGraphics.DisplayText(humidity, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 54);
             display.SimpleGraphics.Redraw();
         }
 
-        public void UpdateMouseData(int exceptionCounter, string position, string millimetersPosition)
+        public static void UpdateMouseData(int exceptionCounter, string position, string millimetersPosition)
         {
             string toPrint = "Exceptions raised: " + exceptionCounter;
-            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 54, 320, 36);                        
-            display.SimpleGraphics.DisplayText(position, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 54);
-            display.SimpleGraphics.DisplayText(millimetersPosition, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 72);
-            display.SimpleGraphics.DisplayText(toPrint, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 90);
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 72, 320, 54);
+            display.SimpleGraphics.DisplayText(position, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 72);
+            display.SimpleGraphics.DisplayText(millimetersPosition, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 90);
+            display.SimpleGraphics.DisplayText(toPrint, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 108);
             display.SimpleGraphics.Redraw();
         }
-
-        public void UpdateDateTime()
-        {
-            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 124, 320, 18);
-            display.SimpleGraphics.DisplayText(DateTime.UtcNow.ToString(), Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 124);
-            display.SimpleGraphics.Redraw();
-        }
-
     }
 }

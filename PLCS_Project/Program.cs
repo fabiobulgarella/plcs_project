@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using System.Reflection;
 using Microsoft.SPOT;
 using Microsoft.SPOT.IO;
 using Microsoft.SPOT.Presentation;
@@ -11,10 +12,12 @@ using Microsoft.SPOT.Presentation.Media;
 using Microsoft.SPOT.Presentation.Shapes;
 using Microsoft.SPOT.Touch;
 
+using GHI.Networking;
 using GHI.Usb.Host;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
 using Gadgeteer.Modules.GHIElectronics;
+using System.Collections;
 
 namespace PLCS_Project
 {
@@ -22,7 +25,7 @@ namespace PLCS_Project
     {
         private Mouse mouse;
         private BME280Device bme280;
-        private Display display;
+        private Network network;
         
         private bool sdCardMounted = false;
         private bool bme280Working = false;
@@ -33,25 +36,11 @@ namespace PLCS_Project
         {
             Debug.Print("Program Started");
 
-            // Setup display
-            display = new Display(displayTE35);
-
             // Setup leds            
             this.ledStrip.TurnAllLedsOff();
 
-            // Setup mouse position reset button
-            button.Mode = Button.LedMode.OnWhilePressed;
-            button.ButtonPressed += button_ButtonPressed;
-
             // Setup display
-            this.displayTE35.SimpleGraphics.AutoRedraw = false;
-
-            // Setup newtork
-            InitNetwork();
-
-            // Setup sdcard
-            this.sdCard.Mounted += sdCard_Mounted;
-            this.sdCard.Unmounted += sdCard_Unmounted;
+            Display.setDisplay(displayTE35);
 
             // Setup USBHost patched module and get mouse if already connected
             InitMouse();
@@ -59,6 +48,13 @@ namespace PLCS_Project
             // Setup bosch bme280 sensor
             Thread setupSensor = new Thread(InitSensor);
             setupSensor.Start();
+
+            // Setup network
+            network = new Network(ethernetJ11D, wifiRS21, button2);
+
+            // Setup sdcard
+            this.sdCard.Mounted += sdCard_Mounted;
+            this.sdCard.Unmounted += sdCard_Unmounted;
             
             // Mouse timers
             GT.Timer mouseTimer = new GT.Timer(500);
@@ -66,7 +62,7 @@ namespace PLCS_Project
             mouseTimer.Start();
 
             // Writing Timer
-            GT.Timer writingTimer = new GT.Timer(10000);   //120000
+            GT.Timer writingTimer = new GT.Timer(10000);
             writingTimer.Tick += writingTimer_Tick;
             writingTimer.Start();
         }
@@ -75,10 +71,14 @@ namespace PLCS_Project
         {
             if (Controller.GetConnectedDevices().Length > 0)
             {
-                GHI.Usb.Host.Mouse baseMouse = (GHI.Usb.Host.Mouse)Controller.GetConnectedDevices()[0];
-                usbHost_MouseConnected(usbHost, baseMouse);
+                GHI.Usb.Host.Mouse mouse = (GHI.Usb.Host.Mouse)Controller.GetConnectedDevices()[0];
+                usbHost_MouseConnected(usbHost, mouse);
             }
             usbHost.MouseConnected += usbHost_MouseConnected;
+
+            // Setup mouse position reset button
+            button.Mode = Button.LedMode.OnWhilePressed;
+            button.ButtonPressed += button_ButtonPressed;
         }
 
         private void InitSensor()
@@ -114,32 +114,31 @@ namespace PLCS_Project
             sensorTimer_Tick(null);
         }
 
-        private void InitNetwork()
-        {
-            this.ethernetJ11D.NetworkSettings.EnableDhcp();
-            this.ethernetJ11D.NetworkSettings.EnableDynamicDns();
-            this.ethernetJ11D.UseDHCP();
-            this.ethernetJ11D.UseThisNetworkInterface();
-            this.ethernetJ11D.NetworkUp += ethernetJ11D_NetworkUp;
-            this.ethernetJ11D.NetworkDown += ethernetJ11D_NetworkDown;
-        }
-
         void usbHost_MouseConnected(USBHost sender, GHI.Usb.Host.Mouse mouse)
         {
-            Debug.Print("Mouse Connected");
+            // Get Mouse information
+            uint id = mouse.Id;
+            byte interfaceIndex = mouse.InterfaceIndex;
+            ushort vendorId = mouse.VendorId;
+            ushort productId = mouse.ProductId;
+            byte portNumber = mouse.PortNumber;
+            BaseDevice.DeviceType type = mouse.Type;
 
-            // Deactivate GHI.Usb.Host.Mouse internal worker
-            mouse.WorkerInterval = -1;
+            // Remove ghi mouse object
+            Mouse.CleanGhiMouse();
 
             // Create new PLCS Mouse Object
-            this.mouse = new Mouse(mouse.Id, mouse.InterfaceIndex, mouse.VendorId, mouse.ProductId, mouse.PortNumber, mouse.Type);
+            this.mouse = new Mouse(id, interfaceIndex, vendorId, productId, portNumber, type);
             this.mouse.Disconnected += mouse_Disconnected;
+
+            Debug.Print("Mouse Connected");
             ledStrip.TurnLedOn(1);
         }
 
         void mouse_Disconnected(BaseDevice sender, EventArgs e)
         {
             Debug.Print("Mouse Disconnected");
+            Debug.Print("Connected devices -> " + Controller.GetConnectedDevices().Length);
             ledStrip.TurnLedOff(1);
         }
 
@@ -150,17 +149,6 @@ namespace PLCS_Project
                 mouse.ResetPosition();
                 mouse.HasMoved = true;
             }
-        }
-
-        void ethernetJ11D_NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
-        {
-            Debug.Print("Network is Up");
-            Utils.SetupTimeService();
-        }
-
-        void ethernetJ11D_NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
-        {
-            Debug.Print("Network is Down");
         }
 
         void sdCard_Mounted(SDCard sender, GT.StorageDevice device)
@@ -182,7 +170,7 @@ namespace PLCS_Project
         {
             if (mouse != null && mouse.HasMoved)
             {
-                display.UpdateMouseData(mouse.ExceptionCounter, mouse.GetStringPosition(), mouse.GetStringMillimetersPosition());
+                Display.UpdateMouseData(mouse.ExceptionCounter, mouse.GetStringPosition(), mouse.GetStringMillimetersPosition());
                 this.mouse.HasMoved = false;
             }
         }
@@ -192,7 +180,7 @@ namespace PLCS_Project
             try
             {
                 bme280.Measure(out tempC, out pressureMb, out relativeHumidity);
-                display.UpdateSensorData(tempC, pressureMb, relativeHumidity);
+                Display.UpdateSensorData(tempC, pressureMb, relativeHumidity);
                 
                 if (!bme280Working)
                 {
@@ -225,7 +213,6 @@ namespace PLCS_Project
 
                 byte[] data = Json.CreateJsonMeasurements(mouse.GetMillimetersX(), mouse.GetMillimetersY(), tempC, pressureMb, relativeHumidity);
                 string filePath = "00_ToSend\\" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss"+"+00:00") + ".json";                
-                display.UpdateDateTime();                
                 this.displayTE35.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 140, 320, 18);
                 this.displayTE35.SimpleGraphics.DisplayText(filePath, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 140);
                 this.displayTE35.SimpleGraphics.Redraw();
