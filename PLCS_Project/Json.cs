@@ -97,7 +97,7 @@ namespace PLCS_Project
         {
             StringBuilder newJson = new StringBuilder();
 
-            String oldJson = BitConverter.ToString(data);
+            String oldJson = new String(Encoding.UTF8.GetChars(data));
             int index = 0;
             int nowIndex = 0;
             while (true)
