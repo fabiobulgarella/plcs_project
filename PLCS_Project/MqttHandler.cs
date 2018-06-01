@@ -3,6 +3,7 @@ using System.Threading;
 using System.Net;
 using Microsoft.SPOT;
 using uPLibrary.Networking.M2Mqtt;
+using uPLibrary.Networking.M2Mqtt.Messages;
 
 namespace PLCS_Project
 {
