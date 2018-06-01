@@ -83,7 +83,7 @@ namespace PLCS_Project
         {
             StringBuilder jsonString = new StringBuilder();
             jsonString.Append("{ \"iso_timestamp\": \"");
-            jsonString.Append(DateTime.Now.ToString());
+            jsonString.Append(DateTime.Now.ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00"));
             jsonString.Append("\", \"sensor\": \"");
             jsonString.Append(sensorType);
             jsonString.Append("\", \"value\": ");
