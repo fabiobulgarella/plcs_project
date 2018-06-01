@@ -52,9 +52,10 @@ namespace PLCS_Project
             // Setup network
             network = new Network(ethernetJ11D, wifiRS21, button2);
 
-            // Setup sdcard
+            // Setup sdcard            
             this.sdCard.Mounted += sdCard_Mounted;
             this.sdCard.Unmounted += sdCard_Unmounted;
+            SDMemoryCard.setSDcard(sdCard);
             
             // Mouse timers
             GT.Timer mouseTimer = new GT.Timer(500);
@@ -199,25 +200,30 @@ namespace PLCS_Project
         }
 
         void writingTimer_Tick(GT.Timer timer)
-        {
-            if (this.sdCard.IsCardMounted)
+        {            
+            if (!this.sdCard.IsCardMounted)
             {
-                sdCardMounted = true;
-                this.ledStrip.TurnLedOn(2);
-
-                if (this.sdCard.StorageDevice.ListDirectories(this.sdCard.StorageDevice.RootDirectory).Length == 1)
-                {
-                    this.sdCard.StorageDevice.CreateDirectory("00_ToSend");
-                    this.sdCard.StorageDevice.CreateDirectory("01_Sent");
-                }
-
-                byte[] data = Json.CreateJsonMeasurements(mouse.GetMillimetersX(), mouse.GetMillimetersY(), tempC, pressureMb, relativeHumidity);
-                string filePath = "00_ToSend\\" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss"+"+00:00") + ".json";
-                this.displayTE35.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 140, 320, 18);
-                this.displayTE35.SimpleGraphics.DisplayText(filePath, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 140);
-                this.displayTE35.SimpleGraphics.Redraw();
-                this.sdCard.StorageDevice.WriteFile(filePath, data);
+                this.sdCard.Mount();                
             }
+
+            sdCardMounted = true;
+            this.ledStrip.TurnLedOn(2);                                     
+
+            byte[] data = Json.CreateJsonMeasurements(mouse.GetMillimetersX(), mouse.GetMillimetersY(), tempC, pressureMb, relativeHumidity);
+            long numberOfTicks = DateTime.UtcNow.Ticks;
+            string fileName = "" + numberOfTicks;            
+            Debug.Print("The file: " + fileName + " has been written");          
+            if (!Time.IsTimeSynchronized)
+                fileName += "_notSynch";            
+            SDMemoryCard.writeFile(fileName, data);
+
+            if(!Time.IsTimeSynchronized)
+                SDMemoryCard.renameUnsynchFile(fileName);
+            
+            /*SDMemoryCard.deleteFile(fileName);
+            Debug.Print("The file: " + fileName + " has been deleted");   */
+            this.sdCard.Unmount();          
+           
         }
     }
 }
