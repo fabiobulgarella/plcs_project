@@ -19,6 +19,8 @@ namespace PLCS_Project
             }
         }
 
+        public static long SyncTimeOffset { get; private set; }
+
         public static void InitService()
         {
             if (!timeConfigured)
@@ -33,7 +35,7 @@ namespace PLCS_Project
         private static void SetupTimeService()
         {
             TimeServiceSettings settings = new TimeServiceSettings();
-            settings.RefreshTime = 60;
+            settings.RefreshTime = 20;
             settings.ForceSyncAtWakeUp = true;
 
             TimeService.SystemTimeChanged += TimeService_SystemTimeChanged;
@@ -87,7 +89,14 @@ namespace PLCS_Project
         private static void TimeService_SystemTimeChanged(object sender, SystemTimeChangedEventArgs e)
         {
             Debug.Print("Time Synchronized");
+
+            if (!timeSynchronized)
+            {
+                SyncTimeOffset = TimeService.LastSyncStatus.SyncTimeOffset;
+            }
+
             timeSynchronized = true;
+            TimeService.Stop();
             Display.UpdateTimeStatus(true);
         }
     }

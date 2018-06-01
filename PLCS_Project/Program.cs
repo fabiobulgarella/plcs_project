@@ -212,7 +212,7 @@ namespace PLCS_Project
                 }
 
                 byte[] data = Json.CreateJsonMeasurements(mouse.GetMillimetersX(), mouse.GetMillimetersY(), tempC, pressureMb, relativeHumidity);
-                string filePath = "00_ToSend\\" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss"+"+00:00") + ".json";                
+                string filePath = "00_ToSend\\" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss"+"+00:00") + ".json";
                 this.displayTE35.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 140, 320, 18);
                 this.displayTE35.SimpleGraphics.DisplayText(filePath, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 140);
                 this.displayTE35.SimpleGraphics.Redraw();

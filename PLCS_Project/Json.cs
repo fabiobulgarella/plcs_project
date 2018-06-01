@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PLCS_Project
 {
-    class Json
+    static class Json
     {
         private const String device_id = "FEZ_49";
         private const String project_name = "Fissure monitoring";
@@ -91,6 +91,28 @@ namespace PLCS_Project
             jsonString.Append(" }");
             
             return jsonString.ToString();
+        }
+
+        public static byte[] ChangeTimestamps(byte[] data, long newTimestamp)
+        {
+            StringBuilder newJson = new StringBuilder();
+
+            String oldJson = BitConverter.ToString(data);
+            int index = 0;
+            int nowIndex = 0;
+            while (true)
+            {
+                index = oldJson.IndexOf("iso_timestamp", index);
+                if (index == -1) break;
+
+                newJson.Append(oldJson, nowIndex, index - nowIndex + 17);
+                newJson.Append(new DateTime(newTimestamp).ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00") + "\"");
+                nowIndex += index + 43;
+            }
+
+            newJson.Append(oldJson, nowIndex, oldJson.Length - nowIndex);
+
+            return Encoding.UTF8.GetBytes(newJson.ToString());
         }
     }
 }
