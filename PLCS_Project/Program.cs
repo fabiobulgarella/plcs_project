@@ -210,9 +210,16 @@ namespace PLCS_Project
             this.ledStrip.TurnLedOn(2);                                     
 
             byte[] data = Json.CreateJsonMeasurements(mouse.GetMillimetersX(), mouse.GetMillimetersY(), tempC, pressureMb, relativeHumidity);
-            string fileName = DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\_mm\\_ss");                                            
+            long numberOfTicks = DateTime.UtcNow.Ticks;
+            string fileName = "" + numberOfTicks;            
+            Debug.Print("The file: " + fileName + " has been written");          
+            if (!Time.IsTimeSynchronized)
+                fileName += "_notSynch";            
             SDMemoryCard.writeFile(fileName, data);
-            Debug.Print("The file: " + fileName + " has been written");
+
+            if(!Time.IsTimeSynchronized)
+                SDMemoryCard.renameUnsynchFile(fileName);
+            
             /*SDMemoryCard.deleteFile(fileName);
             Debug.Print("The file: " + fileName + " has been deleted");   */
             this.sdCard.Unmount();          
