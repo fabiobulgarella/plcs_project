@@ -18,7 +18,7 @@ namespace PLCS_Project
             public double temperature;
             public double pressure;
             public double humidity;
-            public bool[] changed = new bool[5];
+            public bool[] changed;
         }
 
         private Mouse mouse;
@@ -55,68 +55,78 @@ namespace PLCS_Project
             mouseTimer.Start();
         }
 
-        public Measurements GetMeasurements()
+        public Measurements GetMeasurements(bool[] toForce)
         {
-            Measurements measurements = new Measurements();
-
-            if (Mouse.X != oldX)
-            {
-                measurements.x = mouse.GetMillimetersX();
-                measurements.changed[0] = true;
-            }
-            else
-                measurements.x = null;
-
-            if (Mouse.Y != oldY)
-            {
-                measurements.y = mouse.GetMillimetersY();
-                measurements.changed[1] = true;
-            }
-            else
-                measurements.y = null;
-
-            if (tempC != oldTempC)
-            {
-                measurements.temperature = tempC;
-                measurements.changed[2] = true;
-            }
-            else
-                measurements.temperature = -100;
-
-            if (pressureMb != oldPressureMb)
-            {
-                measurements.pressure = pressureMb;
-                measurements.changed[3] = true;
-            }
-            else
-                measurements.pressure = -100;
-
-            if (relativeHumidity != oldRelativeHumidity)
-            {
-                measurements.humidity = relativeHumidity;
-                measurements.changed[4] = true;
-            }
-            else
-                measurements.humidity = -100;
-
-            return measurements;
-        }
-
-        public Measurements GetForcedMeasurements(bool[] toForce)
-        {
-            Measurements measurements = new Measurements();
+            Measurements measurements;
+            measurements.changed = new bool[5];
 
             if (mouse != null)
             {
-                measurements.x = mouse.GetMillimetersX();
-                measurements.y = mouse.GetMillimetersY();
+                // Get X position
+                int newX = Mouse.X;
+                if (newX != oldX || toForce[0])
+                {
+                    oldX = newX;
+                    measurements.x = Mouse.GetMillimetersX(newX);
+                    measurements.changed[0] = true;
+                }
+                else
+                    measurements.x = null;
+
+                // Get Y position
+                int newY = Mouse.Y;
+                if (newY != oldY || toForce[1])
+                {
+                    oldY = newY;
+                    measurements.y = Mouse.GetMillimetersY(newY);
+                    measurements.changed[1] = true;
+                }
+                else
+                    measurements.y = null;
+            }
+            else
+            {
+                measurements.x = null;
+                measurements.y = null;
             }
 
             if (bme280Working)
             {
-                measurements.temperature = tempC;
-                measurements.humidity = relativeHumidity;
-                measurements.pressure = pressureMb;
+                // Get Temperature
+                if (tempC != oldTempC || toForce[2])
+                {
+                    oldTempC = tempC;
+                    measurements.temperature = tempC;
+                    measurements.changed[2] = true;
+                }
+                else
+                    measurements.temperature = -100;
+
+                // Get Pressure
+                if (pressureMb != oldPressureMb || toForce[3])
+                {
+                    oldPressureMb = pressureMb;
+                    measurements.pressure = pressureMb;
+                    measurements.changed[3] = true;
+                }
+                else
+                    measurements.pressure = -100;
+
+                // Get Relative Humidity
+                if (relativeHumidity != oldRelativeHumidity || toForce[4])
+                {
+                    oldRelativeHumidity = relativeHumidity;
+                    measurements.humidity = relativeHumidity;
+                    measurements.changed[4] = true;
+                }
+                else
+                    measurements.humidity = -100;
+            }
+            else
+            {
+                measurements.temperature = -100;
+                measurements.humidity = -100;
+                measurements.pressure = -100;
             }
 
             return measurements;

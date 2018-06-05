@@ -93,6 +93,18 @@ namespace PLCS_Project
             return millimetersY.ToString("F2");
         }
 
+        public static string GetMillimetersX(int X)
+        {
+            double millimetersX = X / dotMillimeters;
+            return millimetersX.ToString("F2");
+        }
+
+        public static string GetMillimetersY(int Y)
+        {
+            double millimetersY = Y / dotMillimeters;
+            return millimetersY.ToString("F2");
+        }
+
         public string GetStringPosition()
         {
             return "DPI ->  X: " + X.ToString() + "   Y: " + Y.ToString();

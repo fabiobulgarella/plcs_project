@@ -27,43 +27,42 @@ namespace PLCS_Project
         {            
             bool[] toForce = new bool[5];
 
+            // Check if Sdcard is present
             if (!SDMemoryCard.IsMounted || !SDMemoryCard.IsCardInserted)
             {
                 SDMemoryCard.Unmount();
                 if (!SDMemoryCard.Mount())
                     return;
             }
-            // Get measurements from sensors handler
-            SensorsHandler.Measurements m = sensors.GetMeasurements();
+            
+            // Check what measures have to be forced
+            for (int i = 0; i < 5; i++)
+            {
+                if (measuresNotChanged[i]==9)
+                {
+                    toForce[i] = true;
+                    measuresNotChanged[i] = 0;
+                }              
+            }
 
+            // Get measurements from sensors handler
+            SensorsHandler.Measurements m = sensors.GetMeasurements(toForce);
+
+            // Update measuresNotChanged values
             for (int i = 0; i < 5; i++)
             {
                 if (!m.changed[i])
-                {
-                    if (measuresNotChanged[i]==9)
-                    {
-                        toForce[i] = true;
-                        measuresNotChanged[i] = 0;
-                        continue;
-                    }
-                    measuresNotChanged[i]++;                                    
-                }                    
+                    measuresNotChanged[i]++;
             }
 
-            foreach (bool force in toForce)
-            {
-                if (force)
-                {
-                    m = sensors.GetForcedMeasurements(toForce);
-                    break;
-                }                    
-            }
-
+            // Produce JSON and write it on a file
             byte[] data = Json.CreateJsonMeasurements(m.x, m.y, m.temperature, m.pressure, m.humidity);
             long numberOfTicks = Json.measureTimeTicks;
             string fileName = "" + numberOfTicks;           
+            
             if (!Time.IsTimeSynchronized)
                 fileName += "_notSynch";
+            
             SDMemoryCard.writeFile(fileName, data);
             Debug.Print("The file: " + fileName + " has been written");          
         }
