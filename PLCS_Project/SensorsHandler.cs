@@ -198,7 +198,7 @@ namespace PLCS_Project
                 {
                     bme280Working = true;
                     Utils.TurnLedOn(0);
-                    Display.UpdateTPUState(true);
+                    Display.UpdateTPHState(true);
                     Debug.Print("Sensor connected");                    
                 }
                 
@@ -207,7 +207,7 @@ namespace PLCS_Project
             {
                 bme280Working = false;
                 Utils.TurnLedOff(0);
-                Display.UpdateTPUState(false);
+                Display.UpdateTPHState(false);
                 Debug.Print("Unable to read sensor data");
                 Debug.Print("Sensor disconnected");
             }

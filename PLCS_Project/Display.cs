@@ -15,7 +15,7 @@ namespace PLCS_Project
             display.SimpleGraphics.AutoRedraw = false;
             PrintHeader();
             UpdateMouseState(false);
-            UpdateTPUState(false);
+            UpdateTPHState(false);
             UpdateSDState(false);
         }
 
@@ -75,11 +75,11 @@ namespace PLCS_Project
             display.SimpleGraphics.Redraw();
         }
 
-        public static void UpdateTPUState(bool activeTPU)
+        public static void UpdateTPHState(bool activeTPH)
         {
-            GT.Color colorTPU = activeTPU ? GT.Color.Green : GT.Color.Red;
+            GT.Color colorTPH = activeTPH ? GT.Color.Green : GT.Color.Red;
             display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 265, 225, 35, 35);
-            display.SimpleGraphics.DisplayText("TPU", Resources.GetFont(Resources.FontResources.NinaB), colorTPU, 265, 225);
+            display.SimpleGraphics.DisplayText("TPH", Resources.GetFont(Resources.FontResources.NinaB), colorTPH, 265, 225);
             display.SimpleGraphics.Redraw();
         }
 
@@ -94,8 +94,8 @@ namespace PLCS_Project
         public static void UpdateMouseState(bool activeMouse)
         {
             GT.Color colorMouse = activeMouse ? GT.Color.Green : GT.Color.Red;
-            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 245, 225, 15, 15);
-            display.SimpleGraphics.DisplayText("M", Resources.GetFont(Resources.FontResources.NinaB), colorMouse, 245, 225);
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 240, 225, 15, 15);
+            display.SimpleGraphics.DisplayText("XY", Resources.GetFont(Resources.FontResources.NinaB), colorMouse, 240, 225);
             display.SimpleGraphics.Redraw();
         }
     }
