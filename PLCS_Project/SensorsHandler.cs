@@ -40,6 +40,9 @@ namespace PLCS_Project
             mouseTimer.Start();
         }
 
+        /*
+         * MOUSE SECTION
+         */
         private void InitMouse()
         {
             if (Controller.GetConnectedDevices().Length > 0)
@@ -52,39 +55,6 @@ namespace PLCS_Project
             // Setup mouse position reset button
             button.Mode = Button.LedMode.OnWhilePressed;
             button.ButtonPressed += button_ButtonPressed;
-        }
-
-        private void InitSensor()
-        {
-            bool isNotActivated = true;
-
-            while (isNotActivated)
-            {
-                try
-                {
-                    bme280 = new BME280Device(0x76)
-                    {
-                        AltitudeInMeters = 239
-                    };
-
-                    Utils.TurnLedOn(0);
-                    isNotActivated = false;
-                }
-                catch (BME280Exception)
-                {
-                    Debug.Print("Error during BME280 initiliazation");
-                }
-
-                Thread.Sleep(5000);
-            }
-
-            // Sensor Timer
-            GT.Timer sensorTimer = new GT.Timer(10000);
-            sensorTimer.Tick += sensorTimer_Tick;
-            sensorTimer.Start();
-
-            // Show first bme280 reading
-            sensorTimer_Tick(null);
         }
 
         void usbHost_MouseConnected(USBHost sender, GHI.Usb.Host.Mouse mouse)
@@ -131,6 +101,42 @@ namespace PLCS_Project
                 Display.UpdateMouseData(mouse.ExceptionCounter, mouse.GetStringPosition(), mouse.GetStringMillimetersPosition());
                 this.mouse.HasMoved = false;
             }
+        }
+
+        /*
+         * BOSCH SECTION
+         */
+        private void InitSensor()
+        {
+            bool isNotActivated = true;
+
+            while (isNotActivated)
+            {
+                try
+                {
+                    bme280 = new BME280Device(0x76)
+                    {
+                        AltitudeInMeters = 239
+                    };
+
+                    Utils.TurnLedOn(0);
+                    isNotActivated = false;
+                }
+                catch (BME280Exception)
+                {
+                    Debug.Print("Error during BME280 initiliazation");
+                }
+
+                Thread.Sleep(5000);
+            }
+
+            // Sensor Timer
+            GT.Timer sensorTimer = new GT.Timer(10000);
+            sensorTimer.Tick += sensorTimer_Tick;
+            sensorTimer.Start();
+
+            // Show first bme280 reading
+            sensorTimer_Tick(null);
         }
 
         void sensorTimer_Tick(GT.Timer timer)
