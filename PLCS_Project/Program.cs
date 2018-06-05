@@ -49,7 +49,7 @@ namespace PLCS_Project
             SDMemoryCard.setSDcard(sdCard);
 
             // Setup reader
-            reader = new Reader();
+            reader = new Reader(sensors);
 
             // MqttHandler test
             //mqttHandler = new MqttHandler();

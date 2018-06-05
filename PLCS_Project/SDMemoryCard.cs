@@ -18,9 +18,6 @@ namespace PLCS_Project
             sdCard = sdCardObject;
             sdCard.Mounted += sdCard_Mounted;
             sdCard.Unmounted += sdCard_Unmounted;
-
-            if(!sdCard.IsCardMounted && sdCard.IsCardInserted)
-                sdCard.Mount();
         }
 
         public static bool Mount()
@@ -37,12 +34,14 @@ namespace PLCS_Project
         {
             Debug.Print("SDCard has been Mounted");
             Utils.TurnLedOn(2);
+            Display.UpdateSDState(true);
         }
 
         private static void sdCard_Unmounted(SDCard sender, EventArgs e)
         {
             Debug.Print("SDCard has been Unmounted");
             Utils.TurnLedOff(2);
+            Display.UpdateSDState(false);
         }
 
         public static void writeFile(string fileName, byte[] data)

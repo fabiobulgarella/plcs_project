@@ -23,25 +23,22 @@ namespace PLCS_Project
 
         void writingTimer_Tick(GT.Timer timer)
         {
-            if (SDMemoryCard.IsMounted)
+            if (!SDMemoryCard.IsMounted || !SDMemoryCard.IsCardInserted)
             {
-                // Get measurements from sensors handler
-                SensorsHandler.Measurements m = sensors.getMeasurements();
-
-                byte[] data = Json.CreateJsonMeasurements(m.x, m.y, m.temperature, m.pressure, m.humidity);
-                long numberOfTicks = DateTime.UtcNow.Ticks;
-                string fileName = "" + numberOfTicks;
-                //Debug.Print("The file: " + fileName + " has been written");          
-                if (!Time.IsTimeSynchronized)
-                    fileName += "_notSynch";
-                //SDMemoryCard.writeFile(fileName, data);
-
-                SDMemoryCard.renameUnsynchFile("129513600287878872_notSynch");
-
-                /*SDMemoryCard.deleteFile(fileName);
-                Debug.Print("The file: " + fileName + " has been deleted");   */
                 SDMemoryCard.Unmount();
+                if (!SDMemoryCard.Mount())
+                    return;
             }
+            // Get measurements from sensors handler
+            SensorsHandler.Measurements m = sensors.getMeasurements();
+
+            byte[] data = Json.CreateJsonMeasurements(m.x, m.y, m.temperature, m.pressure, m.humidity);
+            long numberOfTicks = DateTime.UtcNow.Ticks;
+            string fileName = "" + numberOfTicks;           
+            if (!Time.IsTimeSynchronized)
+                fileName += "_notSynch";
+            SDMemoryCard.writeFile(fileName, data);
+            Debug.Print("The file: " + fileName + " has been written");          
         }
     }
 }
