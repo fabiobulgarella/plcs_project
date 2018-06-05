@@ -71,5 +71,29 @@ namespace PLCS_Project
             display.SimpleGraphics.DisplayText(toPrint, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 108);
             display.SimpleGraphics.Redraw();
         }
+
+        private static void UpdateTPUState(bool activeTPU)
+        {
+            GT.Color colorTPU = activeTPU ? GT.Color.Green : GT.Color.Red;
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 285, 220, 35, 35);
+            display.SimpleGraphics.DisplayText("TPU", Resources.GetFont(Resources.FontResources.NinaB), colorTPU, 265, 220);
+            display.SimpleGraphics.Redraw();
+        }
+
+        private static void UpdateSDState(bool activeSD)
+        {
+            GT.Color colorSD = activeSD ? GT.Color.Green : GT.Color.Red;
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 250, 220, 25, 25);
+            display.SimpleGraphics.DisplayText("SD", Resources.GetFont(Resources.FontResources.NinaB), colorSD, 265, 220);
+            display.SimpleGraphics.Redraw();
+        }
+
+        private static void UpdateMouseState(bool activeMouse)
+        {
+            GT.Color colorMouse = activeMouse ? GT.Color.Green : GT.Color.Red;
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 225, 220, 15, 15);
+            display.SimpleGraphics.DisplayText("M", Resources.GetFont(Resources.FontResources.NinaB), colorMouse, 265, 220);
+            display.SimpleGraphics.Redraw();
+        }
     }
 }
