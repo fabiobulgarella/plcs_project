@@ -55,7 +55,7 @@ namespace PLCS_Project
             mouseTimer.Start();
         }
 
-        public Measurements getMeasurements()
+        public Measurements GetMeasurements()
         {
             Measurements measurements = new Measurements();
 
@@ -102,7 +102,7 @@ namespace PLCS_Project
             return measurements;
         }
 
-        public Measurements getForcedMeasurements(bool[] toForce)
+        public Measurements GetForcedMeasurements(bool[] toForce)
         {
             Measurements measurements = new Measurements();
 

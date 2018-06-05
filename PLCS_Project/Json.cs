@@ -22,6 +22,7 @@ namespace PLCS_Project
         private const String y_fissure_size = "y_fissure_size";
 
         private static String measureTime;
+        public static long measureTimeTicks;
 
         public static byte[] CreateJsonConfiguration()
         {
@@ -61,7 +62,8 @@ namespace PLCS_Project
         
         public static byte[] CreateJsonMeasurements(String x, String y, double tempC, double pressureMb, double relativeHumidity)
         {
-            measureTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00");
+            measureTimeTicks = DateTime.UtcNow.Ticks;
+            measureTime = new DateTime(measureTimeTicks).ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00");
 
             StringBuilder jsonString = new StringBuilder();
             jsonString.Append("{ \"device_id\": \"");
