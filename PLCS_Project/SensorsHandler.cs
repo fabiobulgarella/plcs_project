@@ -16,8 +16,9 @@ namespace PLCS_Project
             public String x;
             public String y;
             public double temperature;
-            public double humidity;
             public double pressure;
+            public double humidity;
+            public bool[] changed = new bool[5];
         }
 
         private Mouse mouse;
@@ -59,29 +60,64 @@ namespace PLCS_Project
             Measurements measurements = new Measurements();
 
             if (Mouse.X != oldX)
+            {
                 measurements.x = mouse.GetMillimetersX();
+                measurements.changed[0] = true;
+            }
             else
                 measurements.x = null;
 
             if (Mouse.Y != oldY)
+            {
                 measurements.y = mouse.GetMillimetersY();
+                measurements.changed[1] = true;
+            }
             else
                 measurements.y = null;
 
             if (tempC != oldTempC)
+            {
                 measurements.temperature = tempC;
+                measurements.changed[2] = true;
+            }
             else
                 measurements.temperature = -100;
 
+            if (pressureMb != oldPressureMb)
+            {
+                measurements.pressure = pressureMb;
+                measurements.changed[3] = true;
+            }
+            else
+                measurements.pressure = -100;
+
             if (relativeHumidity != oldRelativeHumidity)
+            {
                 measurements.humidity = relativeHumidity;
+                measurements.changed[4] = true;
+            }
             else
                 measurements.humidity = -100;
 
-            if (pressureMb != oldPressureMb)
+            return measurements;
+        }
+
+        public Measurements getForcedMeasurements(bool[] toForce)
+        {
+            Measurements measurements = new Measurements();
+
+            if (mouse != null)
+            {
+                measurements.x = mouse.GetMillimetersX();
+                measurements.y = mouse.GetMillimetersY();
+            }
+
+            if (bme280Working)
+            {
+                measurements.temperature = tempC;
+                measurements.humidity = relativeHumidity;
                 measurements.pressure = pressureMb;
-            else
-                measurements.pressure = -100;
+            }
 
             return measurements;
         }
