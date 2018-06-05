@@ -777,6 +777,7 @@ namespace PLCS_Project
             double temperature;
             double temperature_min = -40;
             double temperature_max = 85;
+            double calibrationOffset = 0.3; 
 
             var1 = ((double)RawTemperatureADC) / 16384.0 - ((double)dig_T1) / 1024.0;
             var1 = var1 * ((double)dig_T2);
@@ -784,6 +785,8 @@ namespace PLCS_Project
             var2 = (var2 * var2) * ((double)dig_T3);
             TemperatureFine = (int)(var1 + var2);
             temperature = (var1 + var2) / 5120.0;
+
+            temperature -= calibrationOffset;
 
             if (temperature < temperature_min)
                 temperature = temperature_min;
@@ -901,6 +904,7 @@ namespace PLCS_Project
             double var4;
             double var5;
             double var6;
+            double calibrationOffset = 3;
 
             var1 = ((double)TemperatureFine) - 76800.0;
             var2 = (((double)dig_H4) * 64.0 + (((double)dig_H5) / 16384.0) * var1);
@@ -910,6 +914,8 @@ namespace PLCS_Project
             var6 = 1.0 + (((double)dig_H6) / 67108864.0) * var1 * var5;
             var6 = var3 * var4 * (var5 * var6);
             humidity = var6 * (1.0 - ((double)dig_H1) * var6 / 524288.0);
+
+            humidity += calibrationOffset;
 
             if (humidity > humidity_max)
                 humidity = humidity_max;

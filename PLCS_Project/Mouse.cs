@@ -84,13 +84,13 @@ namespace PLCS_Project
         public string GetMillimetersX()
         {
             double millimetersX = X / dotMillimeters;
-            return millimetersX.ToString("F3");
+            return millimetersX.ToString("F2");
         }
 
         public string GetMillimetersY()
         {
             double millimetersY = Y / dotMillimeters;
-            return millimetersY.ToString("F3");
+            return millimetersY.ToString("F2");
         }
 
         public string GetStringPosition()

@@ -82,19 +82,19 @@ namespace PLCS_Project
 
             if (tempC != -100)
             {
-                String tempJson = CreateSingleJsonMeasurement(temperature, tempC.ToString("F2"));
+                String tempJson = CreateSingleJsonMeasurement(temperature, tempC.ToString("F1"));
                 jsonString.Append(tempJson + ", ");
             }
 
             if (relativeHumidity != -100)
             {
-                String humidityJson = CreateSingleJsonMeasurement(humidity, relativeHumidity.ToString("F2"));
+                String humidityJson = CreateSingleJsonMeasurement(humidity, relativeHumidity.ToString("F1"));
                 jsonString.Append(humidityJson + ", ");
             }
 
             if (pressureMb != -100)
             {
-                String pressureJson = CreateSingleJsonMeasurement(pressure, pressureMb.ToString("F2"));
+                String pressureJson = CreateSingleJsonMeasurement(pressure, pressureMb.ToString("F1"));
                 jsonString.Append(pressureJson + ", ");
             }
 

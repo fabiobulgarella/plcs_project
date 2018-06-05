@@ -53,7 +53,7 @@ namespace PLCS_Project
             //writingTimer.Start();
 
             // MqttHandler test
-            mqttHandler = new MqttHandler();
+            //mqttHandler = new MqttHandler();
         }
 
         void writingTimer_Tick(GT.Timer timer)

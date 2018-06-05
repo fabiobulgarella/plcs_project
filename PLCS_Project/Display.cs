@@ -52,9 +52,9 @@ namespace PLCS_Project
 
         public static void UpdateSensorData(double tempC, double pressureMb, double relativeHumidity)
         {
-            string temp = "Temperature: " + tempC.ToString("F2") + " C°";
-            string pressure = "Pressure: " + pressureMb.ToString("F2") + " mBar";
-            string humidity = "Relative Humidity: " + relativeHumidity.ToString("F2") + " %";
+            string temp = "Temperature: " + tempC.ToString("F1") + " C°";
+            string pressure = "Pressure: " + pressureMb.ToString("F1") + " mBar";
+            string humidity = "Relative Humidity: " + relativeHumidity.ToString("F1") + " %";
             display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 18, 320, 54);
             display.SimpleGraphics.DisplayText(temp, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 18);
             display.SimpleGraphics.DisplayText(pressure, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 36);
