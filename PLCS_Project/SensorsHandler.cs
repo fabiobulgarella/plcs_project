@@ -11,6 +11,15 @@ namespace PLCS_Project
 {
     class SensorsHandler
     {
+        public struct Measurements
+        {
+            public String x;
+            public String y;
+            public double temperature;
+            public double humidity;
+            public double pressure;
+        }
+
         private Mouse mouse;
         private BME280Device bme280;
         private USBHost usbHost;
@@ -24,8 +33,13 @@ namespace PLCS_Project
 
         public SensorsHandler(USBHost usbHostObject, Button buttonObject)
         {
+            // Set objects
             usbHost = usbHostObject;
             button = buttonObject;
+
+            // Initialize old variables
+            oldX = oldY = 0;
+            oldTempC = oldPressureMb = oldPressureMb = 0;
 
             // Setup USBHost patched module and get mouse if already connected
             InitMouse();
@@ -38,6 +52,38 @@ namespace PLCS_Project
             GT.Timer mouseTimer = new GT.Timer(500);
             mouseTimer.Tick += mouseTimer_Tick;
             mouseTimer.Start();
+        }
+
+        public Measurements getMeasurements()
+        {
+            Measurements measurements = new Measurements();
+
+            if (Mouse.X != oldX)
+                measurements.x = mouse.GetMillimetersX();
+            else
+                measurements.x = null;
+
+            if (Mouse.Y != oldY)
+                measurements.y = mouse.GetMillimetersY();
+            else
+                measurements.y = null;
+
+            if (tempC != oldTempC)
+                measurements.temperature = tempC;
+            else
+                measurements.temperature = -100;
+
+            if (relativeHumidity != oldRelativeHumidity)
+                measurements.humidity = relativeHumidity;
+            else
+                measurements.humidity = -100;
+
+            if (pressureMb != oldPressureMb)
+                measurements.pressure = pressureMb;
+            else
+                measurements.pressure = -100;
+
+            return measurements;
         }
 
         /*

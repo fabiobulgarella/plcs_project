@@ -27,6 +27,7 @@ namespace PLCS_Project
         private SensorsHandler sensors;
         private Network network;
         private MqttHandler mqttHandler;
+        private Reader reader;
 
         void ProgramStarted()
         {
@@ -46,37 +47,12 @@ namespace PLCS_Project
 
             // Setup sdcard            
             SDMemoryCard.setSDcard(sdCard);
-            
-            // Writing Timer
-            GT.Timer writingTimer = new GT.Timer(20000);
-            writingTimer.Tick += writingTimer_Tick;
-            //writingTimer.Start();
+
+            // Setup reader
+            reader = new Reader();
 
             // MqttHandler test
             //mqttHandler = new MqttHandler();
-        }
-
-        void writingTimer_Tick(GT.Timer timer)
-        {
-            if (SDMemoryCard.IsMounted)
-            {
-                this.sdCard.Mount();                
-            }
-
-            //byte[] data = Json.CreateJsonMeasurements(mouse.GetMillimetersX(), mouse.GetMillimetersY(), tempC, pressureMb, relativeHumidity);
-            long numberOfTicks = DateTime.UtcNow.Ticks;
-            string fileName = "" + numberOfTicks;            
-            //Debug.Print("The file: " + fileName + " has been written");          
-            if (!Time.IsTimeSynchronized)
-                fileName += "_notSynch";            
-            //SDMemoryCard.writeFile(fileName, data);
-
-            SDMemoryCard.renameUnsynchFile("129513600287878872_notSynch");
-            
-            /*SDMemoryCard.deleteFile(fileName);
-            Debug.Print("The file: " + fileName + " has been deleted");   */
-            this.sdCard.Unmount();          
-           
         }
     }
 }

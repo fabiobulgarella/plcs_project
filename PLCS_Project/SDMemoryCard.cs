@@ -23,6 +23,16 @@ namespace PLCS_Project
                 sdCard.Mount();
         }
 
+        public static bool Mount()
+        {
+            return sdCard.Mount();
+        }
+
+        public static bool Unmount()
+        {
+            return sdCard.Unmount();
+        }
+
         private static void sdCard_Mounted(SDCard sender, GT.StorageDevice device)
         {
             Debug.Print("SDCard has been Mounted");
