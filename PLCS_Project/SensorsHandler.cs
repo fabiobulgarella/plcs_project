@@ -158,6 +158,7 @@ namespace PLCS_Project
 
             Debug.Print("Mouse Connected");
             Utils.TurnLedOn(1);
+            Display.UpdateMouseState(true);
         }
 
         void mouse_Disconnected(BaseDevice sender, EventArgs e)
@@ -165,6 +166,7 @@ namespace PLCS_Project
             Debug.Print("Mouse Disconnected");
             Debug.Print("Connected devices -> " + Controller.GetConnectedDevices().Length);
             Utils.TurnLedOff(1);
+            Display.UpdateMouseState(false);
         }
 
         void button_ButtonPressed(Button sender, Button.ButtonState state)
@@ -232,13 +234,16 @@ namespace PLCS_Project
                 {
                     bme280Working = true;
                     Utils.TurnLedOn(0);
-                    Debug.Print("Sensor connected");
+                    Display.UpdateTPHState(true);
+                    Debug.Print("Sensor connected");                    
                 }
+                
             }
             catch (BME280Exception)
             {
                 bme280Working = false;
                 Utils.TurnLedOff(0);
+                Display.UpdateTPHState(false);
                 Debug.Print("Unable to read sensor data");
                 Debug.Print("Sensor disconnected");
             }

@@ -14,6 +14,9 @@ namespace PLCS_Project
             display = displayObject;
             display.SimpleGraphics.AutoRedraw = false;
             PrintHeader();
+            UpdateMouseState(false);
+            UpdateTPHState(false);
+            UpdateSDState(false);
         }
 
         private static void PrintHeader()
@@ -22,7 +25,7 @@ namespace PLCS_Project
             display.SimpleGraphics.DisplayText("FEZ_49 Group", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 0);
             display.SimpleGraphics.DisplayText("TS", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 265, 0);
             display.SimpleGraphics.DisplayText("E", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 290, 0);
-            display.SimpleGraphics.DisplayText("W", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 305, 0);
+            display.SimpleGraphics.DisplayText("W", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 305, 0);            
             display.SimpleGraphics.Redraw();
         }
 
@@ -72,27 +75,27 @@ namespace PLCS_Project
             display.SimpleGraphics.Redraw();
         }
 
-        private static void UpdateTPUState(bool activeTPU)
+        public static void UpdateTPHState(bool activeTPH)
         {
-            GT.Color colorTPU = activeTPU ? GT.Color.Green : GT.Color.Red;
-            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 285, 220, 35, 35);
-            display.SimpleGraphics.DisplayText("TPU", Resources.GetFont(Resources.FontResources.NinaB), colorTPU, 265, 220);
+            GT.Color colorTPH = activeTPH ? GT.Color.Green : GT.Color.Red;
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 265, 225, 35, 35);
+            display.SimpleGraphics.DisplayText("TPH", Resources.GetFont(Resources.FontResources.NinaB), colorTPH, 265, 225);
             display.SimpleGraphics.Redraw();
         }
 
-        private static void UpdateSDState(bool activeSD)
+        public static void UpdateSDState(bool activeSD)
         {
             GT.Color colorSD = activeSD ? GT.Color.Green : GT.Color.Red;
-            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 250, 220, 25, 25);
-            display.SimpleGraphics.DisplayText("SD", Resources.GetFont(Resources.FontResources.NinaB), colorSD, 265, 220);
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 300, 225, 20, 20);
+            display.SimpleGraphics.DisplayText("SD", Resources.GetFont(Resources.FontResources.NinaB), colorSD, 300, 225);
             display.SimpleGraphics.Redraw();
         }
 
-        private static void UpdateMouseState(bool activeMouse)
+        public static void UpdateMouseState(bool activeMouse)
         {
             GT.Color colorMouse = activeMouse ? GT.Color.Green : GT.Color.Red;
-            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 225, 220, 15, 15);
-            display.SimpleGraphics.DisplayText("M", Resources.GetFont(Resources.FontResources.NinaB), colorMouse, 265, 220);
+            display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 240, 225, 15, 15);
+            display.SimpleGraphics.DisplayText("XY", Resources.GetFont(Resources.FontResources.NinaB), colorMouse, 240, 225);
             display.SimpleGraphics.Redraw();
         }
     }
