@@ -52,12 +52,14 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Reader.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SDMemoryCard.cs" />
+    <Compile Include="SensorsHandler.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

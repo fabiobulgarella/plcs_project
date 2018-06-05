@@ -10,8 +10,8 @@ namespace PLCS_Project
 {
     class Network
     {
-        private const string SSID = "Fabio HS";
-        private const string KEY = "abcd12345";
+        private const string SSID = "Tu Wi.Fi l'americano";
+        private const string KEY = "132ADEC38C28";
 
         private const string IP = "192.168.137.2";
         private const string NETMASK = "255.255.255.0";
@@ -19,30 +19,26 @@ namespace PLCS_Project
 
         private static string[] DNS = new string[] { "208.67.222.222", "208.67.220.220" };
 
+        private static bool ethernetConnected;
+        private static bool wifiConnected;
+
+        public static bool IsConnected { get { return ethernetConnected || wifiConnected; } }
+
         private EthernetJ11D ethernet;
         private WiFiRS21 wifi;
 
         private Thread wifiScanThread;
         private bool wifiEnabled;
 
-        private bool ethernetConnected;
-        private bool wifiConnected;
-
-        public bool IsConnected { get { return ethernetConnected || wifiConnected; } }
-
-        public Network(EthernetJ11D ethernet, WiFiRS21 wifi, Button button)
+        public Network(EthernetJ11D ethernet, WiFiRS21 wifi)
         {
             this.ethernet = ethernet;
             this.wifi = wifi;
             wifiEnabled = true;
-            ethernetConnected = false;
+            ethernetConnected = wifiConnected = false;
 
-            //InitEthernet();
-            InitWifi();
-
-            // Configure network toggle button
-            //button.Mode = Button.LedMode.OnWhilePressed;
-            //button.ButtonPressed += button_ButtonPressed;
+            InitEthernet();
+            //InitWifi();
         }
 
         /*
@@ -65,23 +61,39 @@ namespace PLCS_Project
                 wifiScanThread.Start();
             }
         }
-
-        void button_ButtonPressed(Button sender, Button.ButtonState state)
-        {
-            if (state == Button.ButtonState.Pressed)
-                ToggleNetwork();
-        }
         */
+
+        private void WaitForDhcp(bool forWifi)
+        {
+            Debug.Print("Waiting for DHCP...");
+
+            if (forWifi)
+            {
+                while (wifi.NetworkInterface.IPAddress == "0.0.0.0")
+                {
+                    Thread.Sleep(2000);
+                }
+            }
+            else
+            {
+                while (ethernet.NetworkInterface.IPAddress == "0.0.0.0")
+                {
+                    Thread.Sleep(2000);
+                }
+            }
+
+            PrintWifiConfiguration();
+            //Debug.Print("IP Address obtained -> " + wifi.NetworkInterface.IPAddress);
+        }
 
         /**
          * WIFI SECTION
          */
         private void InitWifi()
         {
-            wifiConnected = false;
             wifi.NetworkDown += wifi_NetworkDown;
             wifi.NetworkUp += wifi_NetworkUp;
-            wifi.NetworkInterface.Open();
+            wifi.UseThisNetworkInterface();
             wifi.NetworkInterface.EnableDhcp();
             wifi.NetworkInterface.EnableStaticDns(DNS);
             wifiScanThread = new Thread(WifiScan);
@@ -89,14 +101,13 @@ namespace PLCS_Project
 
         private void WifiScan()
         {
-            Debug.Print("Inside wifi scan");
             while (wifiEnabled && !wifi.IsNetworkConnected)
             {
                 WiFiRS9110.NetworkParameters[] networks = null;
                 try
                 {
                     networks = wifi.NetworkInterface.Scan(SSID);
-                    Debug.Print("Found " + networks.Length + " network with this SSID");
+                    Debug.Print("Found " + networks.Length + " network with SSID \"" + SSID + "\"");
                 }
                 catch (Exception)
                 {
@@ -108,10 +119,12 @@ namespace PLCS_Project
                     try
                     {
                         wifi.NetworkInterface.Join(SSID, KEY);
+                        WaitForDhcp(true);
+                        Time.InitService();
                     }
                     catch (Exception)
                     {
-                        Debug.Print("Unable to connecet to this nwtwork!");
+                        Debug.Print("Unable to connect to this network!");
                     }
                 }
 
@@ -132,7 +145,6 @@ namespace PLCS_Project
             wifiConnected = true;
 
             Display.UpdateWifiStatus(true);
-            Time.InitService();
         }
 
         void wifi_NetworkDown(GT.Modules.Module.NetworkModule sender, GT.Modules.Module.NetworkModule.NetworkState state)
@@ -152,10 +164,8 @@ namespace PLCS_Project
         /**
          * ETHERNET SECTION
          */
-        /*
         private void InitEthernet()
         {
-            ethernetConnected = false;
             ethernet.NetworkDown += ethernet_NetworkDown;
             ethernet.NetworkUp += ethernet_NetworkUp;
             ethernet.UseStaticIP(IP, NETMASK, GATEWAY);
@@ -184,6 +194,5 @@ namespace PLCS_Project
         {
             Debug.Print("ETH Configuration INTERFACE -> " + ethernet.NetworkInterface.IPAddress + "  " + ethernet.NetworkInterface.SubnetMask + "   " + ethernet.NetworkInterface.GatewayAddress + "   " + ethernet.NetworkInterface.DnsAddresses[0] + ", " + ethernet.NetworkInterface.DnsAddresses[1]);
         }
-        */
     }
 }

@@ -10,16 +10,10 @@ namespace PLCS_Project
     {
         private static bool timeConfigured = false;
         private static bool timeSynchronized = false;
+        private static long firstSyncTimeOffset;
 
-        public static bool IsTimeSynchronized
-        {
-            get
-            {
-                return timeSynchronized;
-            }
-        }
-
-        public static long SyncTimeOffset { get; private set; }
+        public static bool IsTimeSynchronized { get { return timeSynchronized; } }
+        public static long FirstSyncTimeOffset { get { return firstSyncTimeOffset; } }
 
         public static void InitService()
         {
@@ -35,13 +29,9 @@ namespace PLCS_Project
         private static void SetupTimeService()
         {
             TimeServiceSettings settings = new TimeServiceSettings();
-            settings.RefreshTime = 20;
-            settings.ForceSyncAtWakeUp = true;
-
             TimeService.SystemTimeChanged += TimeService_SystemTimeChanged;
             TimeService.TimeSyncFailed += TimeService_TimeSyncFailed;
             TimeService.SetTimeZoneOffset(120);
-
 
             IPAddress address = GetNtpAddress("0.it.pool.ntp.org");
             if (address != null)
@@ -52,7 +42,7 @@ namespace PLCS_Project
                 settings.AlternateServer = address.GetAddressBytes();
 
             TimeService.Settings = settings;
-            TimeService.Start();
+            UpdateNow();
         }
 
         private static IPAddress GetNtpAddress(string dn)
@@ -72,13 +62,36 @@ namespace PLCS_Project
                     Debug.Print("Ntp DNS resolving error");
                 }
 
-                Thread.Sleep(60000);
+                Thread.Sleep(30000);
             }
 
             if (address != null)
                 return address[0];
 
             return null;
+        }
+
+        private static void UpdateNow()
+        {
+            while (true)
+            {
+                DateTime beforeTime = DateTime.UtcNow;
+                TimeServiceStatus status = TimeService.UpdateNow(TimeService.Settings.Tolerance);
+
+                if (status.Flags == TimeServiceStatus.TimeServiceStatusFlags.SyncSucceeded)
+                {
+                    if (!timeSynchronized)
+                    {
+                        TimeSpan offset = DateTime.UtcNow - beforeTime;
+                        firstSyncTimeOffset = offset.Ticks;
+                        timeSynchronized = true;
+                    }
+
+                    break;
+                }
+
+                Thread.Sleep(30000);
+            }
         }
 
         private static void TimeService_TimeSyncFailed(object sender, TimeSyncFailedEventArgs e)
@@ -88,16 +101,7 @@ namespace PLCS_Project
 
         private static void TimeService_SystemTimeChanged(object sender, SystemTimeChangedEventArgs e)
         {
-            Debug.Print("Time Synchronized");
-
-            if (!timeSynchronized)
-            {
-                SyncTimeOffset = TimeService.LastSyncStatus.SyncTimeOffset;
-                Debug.Print(SyncTimeOffset.ToString());
-            }
-
-            timeSynchronized = true;
-            TimeService.Stop();
+            Debug.Print("Time Synchronized -> " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
             Display.UpdateTimeStatus(true);
         }
     }

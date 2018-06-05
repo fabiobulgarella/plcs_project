@@ -2,11 +2,41 @@ using System;
 using Microsoft.SPOT;
 using Microsoft.SPOT.IO;
 using GHI.Usb.Descriptors;
+using Gadgeteer.Modules.GHIElectronics;
+using GT = Gadgeteer;
 
 namespace PLCS_Project
 {
     static class Utils
     {
+        private static LEDStrip ledStrip;
+
+        public static void SetLedStrip(LEDStrip ledStripObject)
+        {
+            ledStrip = ledStripObject;
+            ledStrip.TurnAllLedsOff();
+        }
+
+        public static void TurnLedOn(int led)
+        {
+            ledStrip.TurnLedOn(led);
+        }
+
+        public static void TurnLedOff(int led)
+        {
+            ledStrip.TurnLedOff(led);
+        }
+
+        public static void TurnAllLedsOn()
+        {
+            ledStrip.TurnAllLedsOn();
+        }
+
+        public static void TurnAllLedsOff()
+        {
+            ledStrip.TurnAllLedsOff();
+        }
+
         public static void PrintVolumeInfo(VolumeInfo volume)
         {
             Debug.Print("Volume Name: " + volume.Name);

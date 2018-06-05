@@ -21,6 +21,8 @@ namespace PLCS_Project
         private const String x_fissure_size = "x_fissure_size";
         private const String y_fissure_size = "y_fissure_size";
 
+        private static String measureTime;
+
         public static byte[] CreateJsonConfiguration()
         {
             StringBuilder jsonString = new StringBuilder();
@@ -59,22 +61,45 @@ namespace PLCS_Project
         
         public static byte[] CreateJsonMeasurements(String x, String y, double tempC, double pressureMb, double relativeHumidity)
         {
-            String tempJson = CreateSingleJsonMeasurement(temperature, tempC.ToString("F2"));
-            String humidityJson = CreateSingleJsonMeasurement(humidity, relativeHumidity.ToString("F2"));
-            String pressureJson = CreateSingleJsonMeasurement(pressure, pressureMb.ToString("F2"));
-            String xJson = CreateSingleJsonMeasurement(x_fissure_size, x);
-            String yJson = CreateSingleJsonMeasurement(y_fissure_size, y);
-                        
+            measureTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00");
+
             StringBuilder jsonString = new StringBuilder();
             jsonString.Append("{ \"device_id\": \"");
             jsonString.Append(device_id);
             jsonString.Append("\", \"measurements\": [");
-            jsonString.Append(tempJson + ",");
-            jsonString.Append(humidityJson + ", ");
-            jsonString.Append(pressureJson + ", ");
-            jsonString.Append(xJson + ", ");
-            jsonString.Append(yJson);
-            jsonString.Append("]}");            
+
+            if (x != null)
+            {
+                String xJson = CreateSingleJsonMeasurement(x_fissure_size, x);
+                jsonString.Append(xJson + ", ");
+            }
+
+            if (y != null)
+            {
+                String yJson = CreateSingleJsonMeasurement(y_fissure_size, y);
+                jsonString.Append(yJson + ", ");
+            }
+
+            if (tempC != -100)
+            {
+                String tempJson = CreateSingleJsonMeasurement(temperature, tempC.ToString("F2"));
+                jsonString.Append(tempJson + ", ");
+            }
+
+            if (relativeHumidity != -100)
+            {
+                String humidityJson = CreateSingleJsonMeasurement(humidity, relativeHumidity.ToString("F2"));
+                jsonString.Append(humidityJson + ", ");
+            }
+
+            if (pressureMb != -100)
+            {
+                String pressureJson = CreateSingleJsonMeasurement(pressure, pressureMb.ToString("F2"));
+                jsonString.Append(pressureJson + ", ");
+            }
+
+            jsonString.Remove(jsonString.Length - 2, 2);
+            jsonString.Append("]}");
 
             return Encoding.UTF8.GetBytes(jsonString.ToString());
         }
@@ -83,7 +108,7 @@ namespace PLCS_Project
         {
             StringBuilder jsonString = new StringBuilder();
             jsonString.Append("{ \"iso_timestamp\": \"");
-            jsonString.Append(DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00"));
+            jsonString.Append(measureTime);
             jsonString.Append("\", \"sensor\": \"");
             jsonString.Append(sensorType);
             jsonString.Append("\", \"value\": ");
@@ -95,18 +120,19 @@ namespace PLCS_Project
 
         public static byte[] ChangeTimestamps(byte[] data, long newTimestamp)
         {
+            String newMeasureTime = new DateTime(newTimestamp).ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00");
             StringBuilder newJson = new StringBuilder();
-
             String oldJson = new String(Encoding.UTF8.GetChars(data));
+
             int index = 0;
             int nowIndex = 0;
             while (true)
             {
-                index = oldJson.IndexOf("iso_timestamp", index+1);
+                index = oldJson.IndexOf("iso_timestamp", index + 1);
                 if (index == -1) break;
 
                 newJson.Append(oldJson, nowIndex, index - nowIndex + 17);
-                newJson.Append(new DateTime(newTimestamp).ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00") + "\"");
+                newJson.Append(newMeasureTime + "\"");
                 nowIndex = index + 43;
             }
 

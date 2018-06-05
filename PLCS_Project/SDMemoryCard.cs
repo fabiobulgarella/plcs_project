@@ -10,11 +10,29 @@ namespace PLCS_Project
     {
         private static SDCard sdCard;
 
+        public static bool IsMounted { get { return sdCard.IsCardMounted; } }
+        public static bool IsCardInserted { get { return sdCard.IsCardInserted; } }
+
         public static void setSDcard(SDCard sdCardObject)
         {
             sdCard = sdCardObject;
+            sdCard.Mounted += sdCard_Mounted;
+            sdCard.Unmounted += sdCard_Unmounted;
+
             if(!sdCard.IsCardMounted && sdCard.IsCardInserted)
                 sdCard.Mount();
+        }
+
+        private static void sdCard_Mounted(SDCard sender, GT.StorageDevice device)
+        {
+            Debug.Print("SDCard has been Mounted");
+            Utils.TurnLedOn(2);
+        }
+
+        private static void sdCard_Unmounted(SDCard sender, EventArgs e)
+        {
+            Debug.Print("SDCard has been Unmounted");
+            Utils.TurnLedOff(2);
         }
 
         public static void writeFile(string fileName, byte[] data)
@@ -31,19 +49,19 @@ namespace PLCS_Project
 
         public static string renameUnsynchFile(string fileName)
         {
-            Thread.Sleep(5000);
-            long offset = 0;
-            if(Time.IsTimeSynchronized)
-                            offset = Time.SyncTimeOffset;
-            Debug.Print(offset.ToString());
-            long notSynchDate = long.Parse(fileName.Split('_')[0]);
-            long synchDate = notSynchDate + offset;                                      
-            string newFileName = synchDate.ToString() + ".json";
-            byte[] unsynchFile = sdCard.StorageDevice.ReadFile(fileName + ".json");
-            byte[] synchFile = Json.ChangeTimestamps(unsynchFile,synchDate);                                             
-            sdCard.StorageDevice.WriteFile(newFileName, synchFile);
-            sdCard.StorageDevice.Delete(fileName + ".json");
-            return newFileName;
+            if (Time.IsTimeSynchronized)
+            {
+                long notSynchDate = long.Parse(fileName.Split('_')[0]);
+                long synchDate = notSynchDate + Time.FirstSyncTimeOffset;;
+                string newFileName = synchDate.ToString() + ".json";
+                byte[] unsynchFile = sdCard.StorageDevice.ReadFile(fileName + ".json");
+                byte[] synchFile = Json.ChangeTimestamps(unsynchFile, synchDate);
+                sdCard.StorageDevice.WriteFile(newFileName, synchFile);
+                sdCard.StorageDevice.Delete(fileName + ".json");
+                return newFileName;
+            }
+
+            return null;
         }
     }
 }
