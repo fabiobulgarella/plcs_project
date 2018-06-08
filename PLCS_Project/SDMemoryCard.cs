@@ -46,37 +46,66 @@ namespace PLCS_Project
 
         public static byte[] readFile(string fileName)
         {
-            string filePath = fileName + ".json";
-            return sdCard.StorageDevice.ReadFile(filePath);
+            try
+            {
+                string filePath = fileName + ".json";
+                return sdCard.StorageDevice.ReadFile(filePath);
+            }
+            catch (Exception)
+            {
+                Debug.Print("File not present");
+                return null;
+            }
         }
 
         public static void writeFile(string fileName, byte[] data)
         {
-            string filePath = fileName + ".json";
-            sdCard.StorageDevice.WriteFile(filePath, data);
+            try
+            {
+                string filePath = fileName + ".json";
+                sdCard.StorageDevice.WriteFile(filePath, data);
+            }
+            catch (Exception)
+            {
+                Debug.Print("File not written");
+            }
         }
 
         public static void deleteFile(string fileName)
         {
-            string filePath = fileName + ".json";
-            sdCard.StorageDevice.Delete(filePath);
+            try
+            {
+                string filePath = fileName + ".json";
+                sdCard.StorageDevice.Delete(filePath);
+            }
+            catch (Exception)
+            {
+                Debug.Print("File not deleted");
+            }
         }
 
         public static string renameUnsynchFile(string fileName)
         {
-            if (Time.IsTimeSynchronized)
+            try
             {
-                long notSynchDate = long.Parse(fileName.Split('_')[0]);
-                long synchDate = notSynchDate + Time.FirstSyncTimeOffset;;
-                string newFileName = synchDate.ToString() + ".json";
-                byte[] unsynchFile = sdCard.StorageDevice.ReadFile(fileName + ".json");
-                byte[] synchFile = Json.ChangeTimestamps(unsynchFile, synchDate);
-                sdCard.StorageDevice.WriteFile(newFileName, synchFile);
-                sdCard.StorageDevice.Delete(fileName + ".json");
-                return newFileName;
+                if (Time.IsTimeSynchronized)
+                {
+                    long notSynchDate = long.Parse(fileName.Split('_')[0]);
+                    long synchDate = notSynchDate + Time.FirstSyncTimeOffset; ;
+                    string newFileName = synchDate.ToString() + ".json";
+                    byte[] unsynchFile = sdCard.StorageDevice.ReadFile(fileName + ".json");
+                    byte[] synchFile = Json.ChangeTimestamps(unsynchFile, synchDate);
+                    sdCard.StorageDevice.WriteFile(newFileName, synchFile);
+                    sdCard.StorageDevice.Delete(fileName + ".json");
+                    return newFileName;
+                }
+                return null;
             }
-
-            return null;
+            catch (Exception)
+            {
+                Debug.Print("File not renamed");
+                return null;
+            }            
         }
     }
 }
