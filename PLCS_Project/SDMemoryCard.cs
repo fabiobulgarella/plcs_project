@@ -44,6 +44,12 @@ namespace PLCS_Project
             Display.UpdateSDState(false);
         }
 
+        public static byte[] readFile(string fileName)
+        {
+            string filePath = fileName + ".json";
+            return sdCard.StorageDevice.ReadFile(filePath);
+        }
+
         public static void writeFile(string fileName, byte[] data)
         {
             string filePath = fileName + ".json";
