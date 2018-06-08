@@ -6,6 +6,7 @@ using GHI.Usb.Host;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
 using Gadgeteer.Modules.GHIElectronics;
+using System.Text;
 
 namespace PLCS_Project
 {
@@ -25,6 +26,7 @@ namespace PLCS_Project
         private BME280Device bme280;
         private USBHost usbHost;
         private Button button;
+        private bool mouseFirstConnect;
 
         public static int oldX, oldY;
         public static double tempC, pressureMb, relativeHumidity;
@@ -53,10 +55,18 @@ namespace PLCS_Project
             GT.Timer mouseTimer = new GT.Timer(500);
             mouseTimer.Tick += mouseTimer_Tick;
             mouseTimer.Start();
+
+            // Mouse persistence timer
+            GT.Timer persistenceTimer = new GT.Timer(5000);
+            persistenceTimer.Tick += persistenceTimer_Tick;
+            persistenceTimer.Start();
         }
 
         public Measurements GetMeasurements(bool[] toForce)
         {
+            // Update Bosch data
+            sensorTimer_Tick(null);
+
             Measurements measurements;
             measurements.changed = new bool[5];
 
@@ -137,6 +147,8 @@ namespace PLCS_Project
          */
         private void InitMouse()
         {
+            mouseFirstConnect = true;
+
             if (Controller.GetConnectedDevices().Length > 0)
             {
                 GHI.Usb.Host.Mouse mouse = (GHI.Usb.Host.Mouse)Controller.GetConnectedDevices()[0];
@@ -147,6 +159,36 @@ namespace PLCS_Project
             // Setup mouse position reset button
             button.Mode = Button.LedMode.OnWhilePressed;
             button.ButtonPressed += button_ButtonPressed;
+        }
+
+        private void LoadMouseData()
+        {
+            byte[] data = null;
+
+            while (true)
+            {
+                if (SDMemoryCard.IsCardInserted && SDMemoryCard.IsMounted)
+                {
+                    data = SDMemoryCard.readFile("MouseData");
+                    break;
+                }
+
+                Thread.Sleep(2000);
+            }
+
+            if (data != null)
+            {
+                String mouseData = new String(Encoding.UTF8.GetChars(data));
+                String[] cordinates = mouseData.Split(new char[] { ' ' }, 2);
+                Debug.Print("Lette X -> " + cordinates[0] + "  Y -> " + cordinates[1]);
+
+                if (mouse != null)
+                {
+                    mouse.SetPosition(Int32.Parse(cordinates[0]), Int32.Parse(cordinates[1]));
+                }
+            }
+
+            mouseFirstConnect = false;
         }
 
         void usbHost_MouseConnected(USBHost sender, GHI.Usb.Host.Mouse mouse)
@@ -165,6 +207,11 @@ namespace PLCS_Project
             // Create new PLCS Mouse Object
             this.mouse = new Mouse(id, interfaceIndex, vendorId, productId, portNumber, type);
             this.mouse.Disconnected += mouse_Disconnected;
+
+            if (mouseFirstConnect)
+            {
+                LoadMouseData();
+            }
 
             Debug.Print("Mouse Connected");
             Utils.TurnLedOn(1);
@@ -194,6 +241,15 @@ namespace PLCS_Project
             {
                 Display.UpdateMouseData(mouse.ExceptionCounter, mouse.GetStringPosition(), mouse.GetStringMillimetersPosition());
                 this.mouse.HasMoved = false;
+            }
+        }
+
+        void persistenceTimer_Tick(GT.Timer timer)
+        {
+            if (mouse != null)
+            {
+                String mouseData = Mouse.X + " " + Mouse.Y;
+                SDMemoryCard.writeFile("MouseData", Encoding.UTF8.GetBytes(mouseData));
             }
         }
 

@@ -39,14 +39,14 @@ namespace PLCS_Project
             // Setup display
             Display.setDisplay(displayTE35);
 
+            // Setup sdcard            
+            SDMemoryCard.setSDcard(sdCard);
+
             // Setup sensor
             sensors = new SensorsHandler(usbHost, button);
 
             // Setup network
             network = new Network(ethernetJ11D, wifiRS21);
-
-            // Setup sdcard            
-            SDMemoryCard.setSDcard(sdCard);
 
             // Setup reader
             reader = new Reader(sensors);
