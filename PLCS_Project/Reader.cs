@@ -18,7 +18,7 @@ namespace PLCS_Project
             measuresNotChanged = new int[5];
             
             // Writing Timer
-            GT.Timer writingTimer = new GT.Timer(20000);
+            GT.Timer writingTimer = new GT.Timer(30000);
             writingTimer.Tick += writingTimer_Tick;
             writingTimer.Start();
         }
@@ -38,7 +38,7 @@ namespace PLCS_Project
             // Check what measures have to be forced
             for (int i = 0; i < 5; i++)
             {
-                if (measuresNotChanged[i]==9)
+                if (measuresNotChanged[i] == 14)
                 {
                     toForce[i] = true;
                     measuresNotChanged[i] = 0;
@@ -63,7 +63,7 @@ namespace PLCS_Project
             if (!Time.IsTimeSynchronized)
                 fileName += "_notSynch";
             
-            SDMemoryCard.writeFile(fileName, data);
+            SDMemoryCard.WriteFile(fileName, data);
             Debug.Print("The file: " + fileName + " has been written");          
         }
     }

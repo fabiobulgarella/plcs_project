@@ -750,8 +750,12 @@ namespace PLCS_Project
         /// </returns>
         private double GetCompensatedTemperatureF()
         {
-            var temp = (GetCompensatedTemperatureC() * 9F / 5F) + 32F;
-            return temp;
+            double tempC = GetCompensatedTemperatureC();
+
+            if (tempC == -101)
+                return tempC;
+            else
+                return (tempC * 9F / 5F) + 32F;
         }
         #endregion
 
@@ -777,7 +781,8 @@ namespace PLCS_Project
             double temperature;
             double temperature_min = -40;
             double temperature_max = 85;
-            double calibrationOffset = 0.3; 
+            double temp_outofrange = -101;
+            double calibrationOffset = -0.3; 
 
             var1 = ((double)RawTemperatureADC) / 16384.0 - ((double)dig_T1) / 1024.0;
             var1 = var1 * ((double)dig_T2);
@@ -786,12 +791,12 @@ namespace PLCS_Project
             TemperatureFine = (int)(var1 + var2);
             temperature = (var1 + var2) / 5120.0;
 
-            temperature -= calibrationOffset;
+            temperature += calibrationOffset;
 
             if (temperature < temperature_min)
-                temperature = temperature_min;
+                temperature = temp_outofrange;
             else if (temperature > temperature_max)
-                temperature = temperature_max;
+                temperature = temp_outofrange;
 
             return temperature;
         }
@@ -816,6 +821,7 @@ namespace PLCS_Project
             double pressure;
             double pressure_min = 30000.0;
             double pressure_max = 110000.0;
+            double pressure_outofrange = -101;
 
             var1 = ((double)TemperatureFine / 2.0) - 64000.0;
             var2 = var1 * var1 * ((double)dig_P6) / 32768.0;
@@ -834,20 +840,18 @@ namespace PLCS_Project
                 pressure = pressure + (var1 + var2 + ((double)dig_P7)) / 16.0;
 
                 if (pressure < pressure_min)
-                    pressure = pressure_min;
+                    pressure = pressure_outofrange;
                 else if (pressure > pressure_max)
-                    pressure = pressure_max;
+                    pressure = pressure_outofrange;
             }
             else
             { /* Invalid case */
-                pressure = pressure_min;
+                pressure = pressure_outofrange;
             }
 
             return pressure;
         }
         #endregion
-
-
 
         #region GetCompensatedPressureInMillibars method (private)
         /// <summary>
@@ -860,9 +864,16 @@ namespace PLCS_Project
         /// </returns>
         private double GetCompensatedPressureInMillibars()
         {
-            var result = GetCompensatedPressureInPa() / kMillibarsPerPa;
-            result += (double)GetMillibarCorrectionForAltitude();
-            return result;
+            double pressurePa = GetCompensatedPressureInPa();
+
+            if (pressurePa == -101)
+                return pressurePa;
+            else
+            {
+                var result = pressurePa / kMillibarsPerPa;
+                result += (double)GetMillibarCorrectionForAltitude();
+                return result;
+            }
         }
         #endregion
 
@@ -877,8 +888,15 @@ namespace PLCS_Project
         /// </returns>
         double GetCompensatedPressureInInchesHg()
         {
-            var result = GetCompensatedPressureInMillibars() * kMillibarsPerKpa * kKpaToInchesHg;
-            return result;
+            double pressureMillibars = GetCompensatedPressureInMillibars();
+
+            if (pressureMillibars == -101)
+                return pressureMillibars;
+            else
+            {
+                var result = pressureMillibars * kMillibarsPerKpa * kKpaToInchesHg;
+                return result;
+            }
         }
         #endregion
 
@@ -898,6 +916,7 @@ namespace PLCS_Project
             double humidity;
             double humidity_min = 0.0;
             double humidity_max = 100.0;
+            double humidity_outofrange = -101;
             double var1;
             double var2;
             double var3;
@@ -918,9 +937,9 @@ namespace PLCS_Project
             humidity += calibrationOffset;
 
             if (humidity > humidity_max)
-                humidity = humidity_max;
+                humidity = humidity_outofrange;
             else if (humidity < humidity_min)
-                humidity = humidity_min;
+                humidity = humidity_outofrange;
 
             return humidity;
         }

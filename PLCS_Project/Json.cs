@@ -6,8 +6,10 @@ namespace PLCS_Project
 {
     static class Json
     {
+        private const String version = "2";
         private const String device_id = "FEZ_49";
         private const String project_name = "Fissure monitoring";
+        private const String project_group = "FEZ 49";
         private const String project_type = "fissure";
         private const String project_description = "Sensors to measure fissure movements in both direction";
         private const String project_location = "Politecnico di Torino";
@@ -15,46 +17,28 @@ namespace PLCS_Project
         private const double project_longitude = 7.691776;
         private const bool project_internal = true;
 
-        private const String temperature = "temperature";
-        private const String humidity = "humidity";
-        private const String pressure = "pressure";
-        private const String x_fissure_size = "x_fissure_size";
-        private const String y_fissure_size = "y_fissure_size";
-
         private static String measureTime;
         public static long measureTimeTicks;
 
         public static byte[] CreateJsonConfiguration()
         {
             StringBuilder jsonString = new StringBuilder();
-            jsonString.Append("{ \"version\": 1, \"id\": \"");
-            jsonString.Append(device_id);
-            jsonString.Append("\", \"name\": \"");
-            jsonString.Append(project_name);
-            jsonString.Append("\", \"group\": \"");
-            jsonString.Append(device_id);
-            jsonString.Append("\", \"type\": \"");
-            jsonString.Append(project_type);
-            jsonString.Append("\", \"sensors\": [\"");
-            jsonString.Append(temperature);
-            jsonString.Append("\", \"");
-            jsonString.Append(humidity);
-            jsonString.Append("\", \"");
-            jsonString.Append(pressure);
-            jsonString.Append("\", \"");
-            jsonString.Append(x_fissure_size);
-            jsonString.Append("\", \"");
-            jsonString.Append(y_fissure_size);
-            jsonString.Append("\"], \"description\": \"");
-            jsonString.Append(project_description);
-            jsonString.Append("\", \"location\": \"");
-            jsonString.Append(project_location);
-            jsonString.Append("\", \"latitude\": ");
-            jsonString.Append(project_latitude);
-            jsonString.Append(", \"longitude\": ");
-            jsonString.Append(project_longitude);
-            jsonString.Append(", \"internal\": ");
-            jsonString.Append(project_internal);
+            jsonString.Append("{ \"version\": " + version);
+            jsonString.Append(", \"id\": \"" + device_id);
+            jsonString.Append("\", \"name\": \"" + project_name);
+            jsonString.Append("\", \"group\": \"" + project_group);
+            jsonString.Append("\", \"type\": \"" + project_type);
+            jsonString.Append("\", \"sensors\": [ ");
+            jsonString.Append("{ \"id\": 1, \"name\": \"displacement x\", \"type\": \"displacement\" }, ");
+            jsonString.Append("{ \"id\": 2, \"name\": \"displacement y\", \"type\": \"displacement\" }, ");
+            jsonString.Append("{ \"id\": 3, \"name\": \"temperature\", \"type\": \"temperature\" }, ");
+            jsonString.Append("{ \"id\": 4, \"name\": \"pressure\", \"type\": \"pressure\" }, ");
+            jsonString.Append("{ \"id\": 5, \"name\": \"humidity\", \"type\": \"humidity\" } ");
+            jsonString.Append("], \"description\": \"" + project_description);
+            jsonString.Append("\", \"location\": \"" + project_location);
+            jsonString.Append("\", \"latitude\": " + project_latitude);
+            jsonString.Append(", \"longitude\": " + project_longitude);
+            jsonString.Append(", \"internal\": " + project_internal);
             jsonString.Append(" }");
 
             return Encoding.UTF8.GetBytes(jsonString.ToString());
@@ -66,56 +50,95 @@ namespace PLCS_Project
             measureTime = new DateTime(measureTimeTicks).ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00");
 
             StringBuilder jsonString = new StringBuilder();
-            jsonString.Append("{ \"device_id\": \"");
-            jsonString.Append(device_id);
+            jsonString.Append("{ \"version\": " + version);
+            jsonString.Append(", \"device_id\": \"" + device_id);
+            jsonString.Append("\", \"iso_timestamp\": \"" + measureTime);
             jsonString.Append("\", \"measurements\": [");
 
+            // Displacement X measurement
             if (x != null)
             {
-                String xJson = CreateSingleJsonMeasurement(x_fissure_size, x);
-                jsonString.Append(xJson + ", ");
+                String xJson;
+
+                if (x == "FAIL")
+                    xJson = CreateSingleJsonMeasurement(1, "", "FAIL");
+                else
+                    xJson = CreateSingleJsonMeasurement(1, x, "OK");
+                
+                jsonString.Append(xJson);
             }
 
+            // Displacement Y measurement
             if (y != null)
             {
-                String yJson = CreateSingleJsonMeasurement(y_fissure_size, y);
-                jsonString.Append(yJson + ", ");
+                String yJson;
+
+                if (y == "FAIL")
+                    yJson = CreateSingleJsonMeasurement(2, "", "FAIL");
+                else
+                    yJson = CreateSingleJsonMeasurement(2, y, "OK");
+
+                jsonString.Append(yJson);
             }
 
+            // Temerature (C°) measurement
             if (tempC != -100)
             {
-                String tempJson = CreateSingleJsonMeasurement(temperature, tempC.ToString("F1"));
-                jsonString.Append(tempJson + ", ");
+                String tempJson;
+
+                if (tempC == -101)
+                    tempJson = CreateSingleJsonMeasurement(3, "0", "OUTOFRANGE");
+                else if (tempC == -102)
+                    tempJson = CreateSingleJsonMeasurement(3, "0", "FAIL");
+                else
+                    tempJson = CreateSingleJsonMeasurement(3, tempC.ToString("F1"), "OK");
+                
+                jsonString.Append(tempJson);
             }
 
-            if (relativeHumidity != -100)
-            {
-                String humidityJson = CreateSingleJsonMeasurement(humidity, relativeHumidity.ToString("F1"));
-                jsonString.Append(humidityJson + ", ");
-            }
-
+            // Pressure (Millibars) measurement
             if (pressureMb != -100)
             {
-                String pressureJson = CreateSingleJsonMeasurement(pressure, pressureMb.ToString("F1"));
-                jsonString.Append(pressureJson + ", ");
+                String pressureJson;
+
+                if (pressureMb == -101)
+                    pressureJson = CreateSingleJsonMeasurement(5, "0", "OUTOFRANGE");
+                else if (pressureMb == -102)
+                    pressureJson = CreateSingleJsonMeasurement(5, "0", "FAIL");
+                else
+                    pressureJson = CreateSingleJsonMeasurement(5, pressureMb.ToString("F1"), "OK");
+
+                jsonString.Append(pressureJson);
+            }
+
+            // Relative Humidity measurement
+            if (relativeHumidity != -100)
+            {
+                String humidityJson;
+
+                if (relativeHumidity == -101)
+                    humidityJson = CreateSingleJsonMeasurement(4, "0", "OUTOFRANGE");
+                else if (relativeHumidity == -102)
+                    humidityJson = CreateSingleJsonMeasurement(4, "0", "FAIL");
+                else
+                    humidityJson = CreateSingleJsonMeasurement(4, relativeHumidity.ToString("F1"), "OK");
+
+                jsonString.Append(humidityJson);
             }
 
             jsonString.Remove(jsonString.Length - 2, 2);
-            jsonString.Append("]}");
+            jsonString.Append(" ] }");
 
             return Encoding.UTF8.GetBytes(jsonString.ToString());
         }
 
-        private static String CreateSingleJsonMeasurement(String sensorType, String value)
+        private static String CreateSingleJsonMeasurement(int sensorId, String value, String status)
         {
             StringBuilder jsonString = new StringBuilder();
-            jsonString.Append("{ \"iso_timestamp\": \"");
-            jsonString.Append(measureTime);
-            jsonString.Append("\", \"sensor\": \"");
-            jsonString.Append(sensorType);
-            jsonString.Append("\", \"value\": ");
-            jsonString.Append(value);
-            jsonString.Append(" }");
+            jsonString.Append("{ \"sensor_id\": " + sensorId);
+            jsonString.Append(", \"iso_timestamp\": \"" + measureTime);
+            jsonString.Append("\", \"value\": " + value);
+            jsonString.Append("\", \"status\": \"" + status + "\" }, ");
             
             return jsonString.ToString();
         }

@@ -96,8 +96,8 @@ namespace PLCS_Project
             }
             else
             {
-                measurements.x = null;
-                measurements.y = null;
+                measurements.x = "FAIL";
+                measurements.y = "FAIL";
             }
 
             if (bme280Working)
@@ -134,9 +134,9 @@ namespace PLCS_Project
             }
             else
             {
-                measurements.temperature = -100;
-                measurements.humidity = -100;
-                measurements.pressure = -100;
+                measurements.temperature = -102;
+                measurements.humidity = -102;
+                measurements.pressure = -102;
             }
 
             return measurements;
@@ -169,7 +169,7 @@ namespace PLCS_Project
             {
                 if (SDMemoryCard.IsCardInserted && SDMemoryCard.IsMounted)
                 {
-                    data = SDMemoryCard.readFile("MouseData");
+                    data = SDMemoryCard.ReadFile("MouseData");
                     break;
                 }
 
@@ -249,7 +249,7 @@ namespace PLCS_Project
             if (mouse != null)
             {
                 String mouseData = Mouse.X + " " + Mouse.Y;
-                SDMemoryCard.writeFile("MouseData", Encoding.UTF8.GetBytes(mouseData));
+                SDMemoryCard.WriteFile("MouseData", Encoding.UTF8.GetBytes(mouseData));
             }
         }
 

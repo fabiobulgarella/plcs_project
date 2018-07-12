@@ -9,7 +9,7 @@ namespace PLCS_Project
     {
         private static DisplayTE35 display;
 
-        public static void setDisplay(DisplayTE35 displayObject)
+        public static void SetDisplay(DisplayTE35 displayObject)
         {
             display = displayObject;
             display.SimpleGraphics.AutoRedraw = false;

@@ -9,11 +9,12 @@ namespace PLCS_Project
     static class SDMemoryCard
     {
         private static SDCard sdCard;
+        private static bool unsynchedToBeRemoved = true;
 
         public static bool IsMounted { get { return sdCard.IsCardMounted; } }
         public static bool IsCardInserted { get { return sdCard.IsCardInserted; } }
 
-        public static void setSDcard(SDCard sdCardObject)
+        public static void SetSDcard(SDCard sdCardObject)
         {
             sdCard = sdCardObject;
             sdCard.Mounted += sdCard_Mounted;
@@ -35,6 +36,10 @@ namespace PLCS_Project
             Debug.Print("SDCard has been Mounted");
             Utils.TurnLedOn(2);
             Display.UpdateSDState(true);
+
+            // Delete unsynched files written before reboot
+            if (unsynchedToBeRemoved)
+                RemoveUnsynchedFiles();
         }
 
         private static void sdCard_Unmounted(SDCard sender, EventArgs e)
@@ -44,7 +49,7 @@ namespace PLCS_Project
             Display.UpdateSDState(false);
         }
 
-        public static byte[] readFile(string fileName)
+        public static byte[] ReadFile(string fileName)
         {
             try
             {
@@ -58,7 +63,7 @@ namespace PLCS_Project
             }
         }
 
-        public static void writeFile(string fileName, byte[] data)
+        public static void WriteFile(string fileName, byte[] data)
         {
             try
             {
@@ -71,11 +76,10 @@ namespace PLCS_Project
             }
         }
 
-        public static void deleteFile(string fileName)
+        public static void DeleteFile(string filePath)
         {
             try
             {
-                string filePath = fileName + ".json";
                 sdCard.StorageDevice.Delete(filePath);
             }
             catch (Exception)
@@ -84,7 +88,7 @@ namespace PLCS_Project
             }
         }
 
-        public static string renameUnsynchFile(string fileName)
+        public static string RenameUnsynchedFile(string fileName)
         {
             try
             {
@@ -106,6 +110,18 @@ namespace PLCS_Project
                 Debug.Print("File not renamed");
                 return null;
             }            
+        }
+
+        private static void RemoveUnsynchedFiles()
+        {
+            String[] fileList = sdCard.StorageDevice.ListFiles("\\");
+            foreach (String fileName in fileList)
+            {
+                if (fileName.IndexOf("_notSynch") != -1)
+                    DeleteFile(fileName);
+            }
+
+            unsynchedToBeRemoved = false;
         }
     }
 }

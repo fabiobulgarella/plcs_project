@@ -37,10 +37,10 @@ namespace PLCS_Project
             Utils.SetLedStrip(ledStrip);
 
             // Setup display
-            Display.setDisplay(displayTE35);
+            Display.SetDisplay(displayTE35);
 
             // Setup sdcard            
-            SDMemoryCard.setSDcard(sdCard);
+            SDMemoryCard.SetSDcard(sdCard);
 
             // Setup sensor
             sensors = new SensorsHandler(usbHost, button);
@@ -51,8 +51,8 @@ namespace PLCS_Project
             // Setup reader
             reader = new Reader(sensors);
 
-            // MqttHandler test
-            //mqttHandler = new MqttHandler();
+            // MqttHandler
+            mqttHandler = new MqttHandler();
         }
     }
 }
