@@ -13,6 +13,7 @@ namespace PLCS_Project
 
         public static bool IsCardMounted { get { return sdCard.IsCardMounted; } }
         public static bool IsCardInserted { get { return sdCard.IsCardInserted; } }
+        public static bool IsInitialized = false;
 
         public static void SetSDcard(SDCard sdCardObject)
         {
@@ -108,6 +109,18 @@ namespace PLCS_Project
             }
         }
 
+        private static void FlushAll()
+        {
+            try
+            {
+                sdCard.StorageDevice.Volume.FlushAll();
+            }
+            catch (Exception)
+            {
+                Debug.Print("Error during FlushAll!");
+            }
+        }
+
         public static bool CheckSdCard()
         {
             if (sdCard.IsCardInserted)
@@ -138,8 +151,10 @@ namespace PLCS_Project
                     byte[] synchFile = Json.ChangeTimestamps(unsynchFile, synchDate);
                     sdCard.StorageDevice.WriteFile(newFileName, synchFile);
                     sdCard.StorageDevice.Delete(fileName);
+                    sdCard.StorageDevice.Volume.FlushAll();
                     return newFileName;
                 }
+
                 return null;
             }
             catch (Exception)
@@ -164,14 +179,22 @@ namespace PLCS_Project
 
         private static void RemoveUnsynchedFiles()
         {
+            int counter = 0;
             String[] fileList = sdCard.StorageDevice.ListRootDirectoryFiles();
+
             foreach (String fileName in fileList)
             {
                 if (fileName.IndexOf("_") != -1)
+                {
                     DeleteFile(fileName);
+                    counter++;
+                }
             }
 
+            FlushAll();
             unsynchedToBeRemoved = false;
+            IsInitialized = true;
+            Debug.Print("Removed " + counter + " unsynched files not recoverable.");
         }
     }
 }

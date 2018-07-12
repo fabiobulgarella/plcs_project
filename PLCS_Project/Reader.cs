@@ -30,6 +30,7 @@ namespace PLCS_Project
                 return;
 
             bool[] toForce = new bool[5];
+            bool toSend = false;
             
             // Check what measures have to be forced
             for (int i = 0; i < 5; i++)
@@ -49,18 +50,23 @@ namespace PLCS_Project
             {
                 if (!m.changed[i])
                     measuresNotChanged[i]++;
+                else
+                    toSend = true;
             }
 
             // Produce JSON and write it on a file
-            byte[] data = Json.CreateJsonMeasurements(m.x, m.y, m.temperature, m.pressure, m.humidity);
-            long numberOfTicks = Json.measureTimeTicks;
-            string fileName = numberOfTicks.ToString();
-            
-            if (!Time.IsTimeSynchronized)
-                fileName += "_notSynch";
-            
-            SDMemoryCard.WriteFile(fileName, data);
-            Debug.Print("The file: " + fileName + " has been written");
+            if (toSend)
+            {
+                byte[] data = Json.CreateJsonMeasurements(m.x, m.y, m.temperature, m.pressure, m.humidity);
+                long numberOfTicks = Json.measureTimeTicks;
+                string fileName = numberOfTicks.ToString();
+
+                if (!Time.IsTimeSynchronized)
+                    fileName += "_notSynch";
+
+                SDMemoryCard.WriteFile(fileName, data);
+                Debug.Print("The file: " + fileName + " has been written");
+            }
         }
     }
 }

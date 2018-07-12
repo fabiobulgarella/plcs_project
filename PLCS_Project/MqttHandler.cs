@@ -144,11 +144,28 @@ namespace PLCS_Project
             waitingGatewayAckFiles = new ArrayList();
             waitingAmazonAckFiles = new ArrayList();
 
+            while (!SDMemoryCard.IsInitialized)
+            {
+                Thread.Sleep(3000);
+            }
+
             while (true)
             {
                 try
                 {
                     String fileName = (String)fileQueue.Dequeue();
+
+                    if (fileName.IndexOf("_") != -1)
+                    {
+                        String newFileName = SDMemoryCard.RenameUnsynchedFile(fileName);
+                        if (newFileName != null)
+                            fileQueue.Enqueue(newFileName);
+                        else
+                            fileQueue.Enqueue(fileName);
+
+                        Thread.Sleep(200);
+                        continue;
+                    }
 
                     if (waitingAmazonAckFiles.Contains(fileName) || waitingGatewayAckFiles.Contains(fileName))
                     {

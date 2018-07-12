@@ -33,14 +33,14 @@ namespace PLCS_Project
         {
             Debug.Print("Program Started");
 
+            // Setup sdcard            
+            SDMemoryCard.SetSDcard(sdCard);
+
             // Setup leds            
             Utils.SetLedStrip(ledStrip);
 
             // Setup display
             Display.SetDisplay(displayTE35);
-
-            // Setup sdcard            
-            SDMemoryCard.SetSDcard(sdCard);
 
             // Setup sensor
             sensors = new SensorsHandler(usbHost, button);
