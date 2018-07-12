@@ -57,7 +57,7 @@ namespace PLCS_Project
             mouseTimer.Start();
 
             // Mouse persistence timer
-            GT.Timer persistenceTimer = new GT.Timer(5000);
+            GT.Timer persistenceTimer = new GT.Timer(6000);
             persistenceTimer.Tick += persistenceTimer_Tick;
             persistenceTimer.Start();
         }
@@ -167,7 +167,7 @@ namespace PLCS_Project
 
             while (true)
             {
-                if (SDMemoryCard.IsCardInserted && SDMemoryCard.IsMounted)
+                if (SDMemoryCard.IsCardInserted && SDMemoryCard.IsCardMounted)
                 {
                     data = SDMemoryCard.ReadFile("MouseData");
                     break;
@@ -249,7 +249,7 @@ namespace PLCS_Project
             if (mouse != null)
             {
                 String mouseData = Mouse.X + " " + Mouse.Y;
-                SDMemoryCard.WriteFile("MouseData", Encoding.UTF8.GetBytes(mouseData));
+                SDMemoryCard.WriteFile("MouseData", Encoding.UTF8.GetBytes(mouseData), true);
             }
         }
 
@@ -281,7 +281,7 @@ namespace PLCS_Project
             }
 
             // Sensor Timer
-            GT.Timer sensorTimer = new GT.Timer(10000);
+            GT.Timer sensorTimer = new GT.Timer(20000);
             sensorTimer.Tick += sensorTimer_Tick;
             sensorTimer.Start();
 

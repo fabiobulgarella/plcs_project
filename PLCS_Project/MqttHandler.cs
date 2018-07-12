@@ -5,6 +5,7 @@ using Microsoft.SPOT;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using System.Text;
+using System.Collections;
 
 namespace PLCS_Project
 {
@@ -16,6 +17,12 @@ namespace PLCS_Project
         
         private MqttClient mqttClient;
         private Thread connectionThread;
+        private Thread transmissionThread;
+
+        private Queue fileQueue;
+        private Hashtable messageIdToFileMap;
+        private ArrayList waitingGatewayAckFiles;
+        private ArrayList waitingAmazonAckFiles;
 
         public MqttHandler()
         {
@@ -24,6 +31,10 @@ namespace PLCS_Project
             // Start trying to connect
             connectionThread = new Thread(Connect);
             connectionThread.Start();
+
+            // Start transmission thread
+            transmissionThread = new Thread(SenderWorker);
+            transmissionThread.Start();
         }
 
         private void InitClient()
@@ -79,20 +90,96 @@ namespace PLCS_Project
 
         void mqttClient_MqttMsgPublished(object sender, MqttMsgPublishedEventArgs e)
         {
-            Debug.Print("Message published -> " + e.IsPublished + " ID -> " + e.MessageId);
+            String fileName = (String)messageIdToFileMap[e.MessageId];
+            messageIdToFileMap.Remove(e.MessageId);
+            waitingGatewayAckFiles.Remove(fileName);
+
+            if (e.IsPublished)
+            {
+                waitingAmazonAckFiles.Add(fileName);
+                Debug.Print("Message published with ID -> " + e.MessageId);
+            }
         }
 
         void mqttClient_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
-            Debug.Print("Message Received: " + e.Message.ToString());
+            String fileName = e.Message.ToString();
+            
+            // Delete correctly sent message (measurements set)
+            SDMemoryCard.DeleteFile(fileName, true);
+            waitingAmazonAckFiles.Remove(fileName);
         }
 
-        private void PublishMessage(byte[] data)
+        private ushort PublishMessage(byte[] data)
         {
             if (mqttClient.IsConnected)
             {
-                // publish a message on "/home/measurements" topic with QoS 2
-                mqttClient.Publish("/FEZ49/measurements", data, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
+                try
+                {
+                    // publish a message on "/FEZ49/measurements" topic with QoS 2
+                    return mqttClient.Publish("/FEZ49/measurements", data, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
+                }
+                catch (Exception)
+                {
+                    Debug.Print("An error occurred publishing a message!");
+                }
+            }
+
+            return 0;
+        }
+
+        private void CreateFileQueue()
+        {
+            string[] fileList = SDMemoryCard.GetFileList();
+
+            if (fileList != null)
+                foreach (string fileName in fileList)
+                    fileQueue.Enqueue(fileName);
+        }
+
+        private void SenderWorker()
+        {
+            fileQueue = new Queue();
+            messageIdToFileMap = new Hashtable();
+            waitingGatewayAckFiles = new ArrayList();
+            waitingAmazonAckFiles = new ArrayList();
+
+            while (true)
+            {
+                try
+                {
+                    String fileName = (String)fileQueue.Dequeue();
+
+                    if (waitingAmazonAckFiles.Contains(fileName) || waitingGatewayAckFiles.Contains(fileName))
+                    {
+                        Thread.Sleep(200);
+                        continue;
+                    }
+
+                    byte[] fileData = SDMemoryCard.ReadFile(fileName);
+
+                    Thread.Sleep(200);
+
+                    if (fileData != null)
+                    {
+                        ushort messageId = PublishMessage(fileData);
+                        
+                        if (messageId == 0)
+                            fileQueue.Enqueue(fileName);
+                        else
+                        {
+                            messageIdToFileMap.Add(messageId, fileName);
+                            waitingGatewayAckFiles.Add(fileName);
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    Thread.Sleep(21000);
+                    CreateFileQueue();
+                }
+
+                Thread.Sleep(8000);
             }
         }
     }

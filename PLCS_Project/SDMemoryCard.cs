@@ -11,7 +11,7 @@ namespace PLCS_Project
         private static SDCard sdCard;
         private static bool unsynchedToBeRemoved = true;
 
-        public static bool IsMounted { get { return sdCard.IsCardMounted; } }
+        public static bool IsCardMounted { get { return sdCard.IsCardMounted; } }
         public static bool IsCardInserted { get { return sdCard.IsCardInserted; } }
 
         public static void SetSDcard(SDCard sdCardObject)
@@ -23,12 +23,28 @@ namespace PLCS_Project
 
         public static bool Mount()
         {
-            return sdCard.Mount();
+            try
+            {
+                return sdCard.Mount();
+            }
+            catch (Exception e)
+            {
+                Debug.Print(e.Message);
+                return false;
+            }
         }
 
         public static bool Unmount()
         {
-            return sdCard.Unmount();
+            try
+            {
+                return sdCard.Unmount();
+            }
+            catch (Exception e)
+            {
+                Debug.Print(e.Message);
+                return false;
+            }
         }
 
         private static void sdCard_Mounted(SDCard sender, GT.StorageDevice device)
@@ -53,8 +69,7 @@ namespace PLCS_Project
         {
             try
             {
-                string filePath = fileName + ".json";
-                return sdCard.StorageDevice.ReadFile(filePath);
+                return sdCard.StorageDevice.ReadFile(fileName);
             }
             catch (Exception)
             {
@@ -63,12 +78,14 @@ namespace PLCS_Project
             }
         }
 
-        public static void WriteFile(string fileName, byte[] data)
+        public static void WriteFile(string fileName, byte[] data, bool flush = false)
         {
             try
             {
-                string filePath = fileName + ".json";
-                sdCard.StorageDevice.WriteFile(filePath, data);
+                sdCard.StorageDevice.WriteFile(fileName, data);
+                
+                if (flush)
+                    sdCard.StorageDevice.Volume.FlushAll();
             }
             catch (Exception)
             {
@@ -76,16 +93,36 @@ namespace PLCS_Project
             }
         }
 
-        public static void DeleteFile(string filePath)
+        public static void DeleteFile(string filePath, bool flush = false)
         {
             try
             {
                 sdCard.StorageDevice.Delete(filePath);
+
+                if (flush)
+                    sdCard.StorageDevice.Volume.FlushAll();
             }
             catch (Exception)
             {
                 Debug.Print("File not deleted");
             }
+        }
+
+        public static bool CheckSdCard()
+        {
+            if (sdCard.IsCardInserted)
+            {
+                if (sdCard.IsCardMounted)
+                    return true;
+                else
+                    return Mount();
+            }
+            else if (sdCard.IsCardMounted)
+            {
+                Unmount();
+            }
+
+            return false;
         }
 
         public static string RenameUnsynchedFile(string fileName)
@@ -95,12 +132,12 @@ namespace PLCS_Project
                 if (Time.IsTimeSynchronized)
                 {
                     long notSynchDate = long.Parse(fileName.Split('_')[0]);
-                    long synchDate = notSynchDate + Time.FirstSyncTimeOffset; ;
-                    string newFileName = synchDate.ToString() + ".json";
-                    byte[] unsynchFile = sdCard.StorageDevice.ReadFile(fileName + ".json");
+                    long synchDate = notSynchDate + Time.FirstSyncTimeOffset;
+                    string newFileName = synchDate.ToString();
+                    byte[] unsynchFile = sdCard.StorageDevice.ReadFile(fileName);
                     byte[] synchFile = Json.ChangeTimestamps(unsynchFile, synchDate);
                     sdCard.StorageDevice.WriteFile(newFileName, synchFile);
-                    sdCard.StorageDevice.Delete(fileName + ".json");
+                    sdCard.StorageDevice.Delete(fileName);
                     return newFileName;
                 }
                 return null;
@@ -112,12 +149,25 @@ namespace PLCS_Project
             }            
         }
 
+        public static string[] GetFileList()
+        {
+            try
+            {
+                return sdCard.StorageDevice.ListRootDirectoryFiles();
+            }
+            catch (Exception e)
+            {
+                Debug.Print("An error occurred getting root file list: " + e.Message);
+                return null;
+            }
+        }
+
         private static void RemoveUnsynchedFiles()
         {
-            String[] fileList = sdCard.StorageDevice.ListFiles("\\");
+            String[] fileList = sdCard.StorageDevice.ListRootDirectoryFiles();
             foreach (String fileName in fileList)
             {
-                if (fileName.IndexOf("_notSynch") != -1)
+                if (fileName.IndexOf("_") != -1)
                     DeleteFile(fileName);
             }
 

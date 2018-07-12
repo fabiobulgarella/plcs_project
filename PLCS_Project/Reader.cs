@@ -25,15 +25,11 @@ namespace PLCS_Project
 
         void writingTimer_Tick(GT.Timer timer)
         {            
-            bool[] toForce = new bool[5];
-
             // Check if Sdcard is present
-            if (!SDMemoryCard.IsMounted || !SDMemoryCard.IsCardInserted)
-            {
-                SDMemoryCard.Unmount();
-                if (!SDMemoryCard.Mount())
-                    return;
-            }
+            if (!SDMemoryCard.CheckSdCard())
+                return;
+
+            bool[] toForce = new bool[5];
             
             // Check what measures have to be forced
             for (int i = 0; i < 5; i++)
@@ -58,13 +54,13 @@ namespace PLCS_Project
             // Produce JSON and write it on a file
             byte[] data = Json.CreateJsonMeasurements(m.x, m.y, m.temperature, m.pressure, m.humidity);
             long numberOfTicks = Json.measureTimeTicks;
-            string fileName = "" + numberOfTicks;           
+            string fileName = numberOfTicks.ToString();
             
             if (!Time.IsTimeSynchronized)
                 fileName += "_notSynch";
             
             SDMemoryCard.WriteFile(fileName, data);
-            Debug.Print("The file: " + fileName + " has been written");          
+            Debug.Print("The file: " + fileName + " has been written");
         }
     }
 }

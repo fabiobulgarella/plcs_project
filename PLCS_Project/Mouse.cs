@@ -21,7 +21,8 @@ namespace PLCS_Project
         private RawDevice.Pipe inputPipe;
         private byte[] inputData;
 
-        public static bool neverConnected = true;
+        private static bool neverConnected = true;
+
         public static int X { get; private set; }
         public static int Y { get; private set; }
         public int ExceptionCounter { get; private set; }
