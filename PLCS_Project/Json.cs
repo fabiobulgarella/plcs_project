@@ -102,11 +102,11 @@ namespace PLCS_Project
                 String pressureJson;
 
                 if (pressureMb == -101)
-                    pressureJson = CreateSingleJsonMeasurement(5, "0", "OUTOFRANGE");
+                    pressureJson = CreateSingleJsonMeasurement(4, "0", "OUTOFRANGE");
                 else if (pressureMb == -102)
-                    pressureJson = CreateSingleJsonMeasurement(5, "0", "FAIL");
+                    pressureJson = CreateSingleJsonMeasurement(4, "0", "FAIL");
                 else
-                    pressureJson = CreateSingleJsonMeasurement(5, pressureMb.ToString("F1"), "OK");
+                    pressureJson = CreateSingleJsonMeasurement(4, pressureMb.ToString("F1"), "OK");
 
                 jsonString.Append(pressureJson);
             }
@@ -117,11 +117,11 @@ namespace PLCS_Project
                 String humidityJson;
 
                 if (relativeHumidity == -101)
-                    humidityJson = CreateSingleJsonMeasurement(4, "0", "OUTOFRANGE");
+                    humidityJson = CreateSingleJsonMeasurement(5, "0", "OUTOFRANGE");
                 else if (relativeHumidity == -102)
-                    humidityJson = CreateSingleJsonMeasurement(4, "0", "FAIL");
+                    humidityJson = CreateSingleJsonMeasurement(5, "0", "FAIL");
                 else
-                    humidityJson = CreateSingleJsonMeasurement(4, relativeHumidity.ToString("F1"), "OK");
+                    humidityJson = CreateSingleJsonMeasurement(5, relativeHumidity.ToString("F1"), "OK");
 
                 jsonString.Append(humidityJson);
             }

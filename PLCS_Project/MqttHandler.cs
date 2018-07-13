@@ -68,6 +68,10 @@ namespace PLCS_Project
                             Debug.Print("Mqtt connection successfully established!");
                             break;
                         }
+                        else
+                        {
+                            Debug.Print("MQTT Client configuration error: broker rejected connection request!");
+                        }
                     }
                     catch (Exception)
                     {
