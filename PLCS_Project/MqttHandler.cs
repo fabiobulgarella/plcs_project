@@ -101,17 +101,18 @@ namespace PLCS_Project
             if (e.IsPublished)
             {
                 waitingAmazonAckFiles.Add(fileName);
-                Debug.Print("Message published with ID -> " + e.MessageId);
+                Debug.Print("Message \"" + fileName + "\" published with ID -> " + e.MessageId);
             }
         }
 
         void mqttClient_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
             String fileName = e.Message.ToString();
-            
+
             // Delete correctly sent message (measurements set)
             SDMemoryCard.DeleteFile(fileName, true);
             waitingAmazonAckFiles.Remove(fileName);
+            Debug.Print("Message \"" + fileName + "\" correctly saved on Amazon S3");
         }
 
         private ushort PublishMessage(byte[] data)
@@ -173,7 +174,7 @@ namespace PLCS_Project
 
                     if (waitingAmazonAckFiles.Contains(fileName) || waitingGatewayAckFiles.Contains(fileName))
                     {
-                        Thread.Sleep(200);
+                        Thread.Sleep(100);
                         continue;
                     }
 

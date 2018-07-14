@@ -144,9 +144,9 @@ namespace PLCS_Project
             {
                 if (Time.IsTimeSynchronized)
                 {
-                    long notSynchDate = long.Parse(fileName.Split('_')[0]);
+                    long notSynchDate = long.Parse(fileName.Split('_')[1]);
                     long synchDate = notSynchDate + Time.FirstSyncTimeOffset;
-                    string newFileName = synchDate.ToString();
+                    string newFileName = new DateTime(synchDate).ToString("yyyy-MM-ddTHH\\:mm\\:ss");
                     byte[] unsynchFile = sdCard.StorageDevice.ReadFile(fileName);
                     byte[] synchFile = Json.ChangeTimestamps(unsynchFile, synchDate);
                     sdCard.StorageDevice.WriteFile(newFileName, synchFile);
