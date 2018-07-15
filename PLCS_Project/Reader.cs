@@ -59,13 +59,15 @@ namespace PLCS_Project
             {
                 byte[] data = Json.CreateJsonMeasurements(m.x, m.y, m.temperature, m.pressure, m.humidity);
                 long numberOfTicks = Json.measureTimeTicks;
-                string fileName = new DateTime(numberOfTicks).ToString("yyyy-MM-ddTHH\\:mm\\:ss");
+                string fileName = new DateTime(numberOfTicks).ToString("yyyyMMddTHHmmss");
 
                 if (!Time.IsTimeSynchronized)
                     fileName += "_" + numberOfTicks;
 
-                SDMemoryCard.WriteFile(fileName, data);
-                Debug.Print("The file: " + fileName + " has been written");
+                if (SDMemoryCard.WriteFile(fileName, data))
+                    Debug.Print("The file: " + fileName + " has been written");
+                else
+                    Debug.Print("ERROR: the file " + fileName + " has not been written");
             }
         }
     }

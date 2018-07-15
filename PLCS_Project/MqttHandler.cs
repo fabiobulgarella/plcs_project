@@ -63,7 +63,7 @@ namespace PLCS_Project
                         // Check if successfully connected
                         if (result == 0)
                         {
-                            mqttClient.Subscribe(new string[] { "/FEZ49/acknowledgments" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+                            mqttClient.Subscribe(new string[] { "FEZ49/acknowledgments" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
 
                             Debug.Print("Mqtt connection successfully established!");
                             break;
@@ -88,8 +88,11 @@ namespace PLCS_Project
         void mqttClient_ConnectionClosed(object sender, EventArgs e)
         {
             Debug.Print("Mqtt connection closed. Trying to reconnect...");
-            if (!connectionThread.IsAlive)
+            if (connectionThread == null || !connectionThread.IsAlive)
+            {
+                connectionThread = new Thread(Connect);
                 connectionThread.Start();
+            }
         }
 
         void mqttClient_MqttMsgPublished(object sender, MqttMsgPublishedEventArgs e)
@@ -107,7 +110,7 @@ namespace PLCS_Project
 
         void mqttClient_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
-            String fileName = e.Message.ToString();
+            String fileName = new String(Encoding.UTF8.GetChars(e.Message));
 
             // Delete correctly sent message (measurements set)
             SDMemoryCard.DeleteFile(fileName, true);
@@ -117,12 +120,12 @@ namespace PLCS_Project
 
         private ushort PublishMessage(byte[] data)
         {
-            if (mqttClient.IsConnected)
+            if (mqttClient.IsConnected && Network.IsConnected)
             {
                 try
                 {
-                    // publish a message on "/FEZ49/measurements" topic with QoS 2
-                    return mqttClient.Publish("/FEZ49/measurements", data, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
+                    // publish a message on "FEZ49/measurements" topic with QoS 2
+                    return mqttClient.Publish("FEZ49/measurements", data, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
                 }
                 catch (Exception)
                 {
@@ -159,6 +162,7 @@ namespace PLCS_Project
                 try
                 {
                     String fileName = (String)fileQueue.Dequeue();
+                    if (fileName == "MouseData") continue;
 
                     if (fileName.IndexOf("_") != -1)
                     {
@@ -197,11 +201,11 @@ namespace PLCS_Project
                 }
                 catch (Exception)
                 {
-                    Thread.Sleep(21000);
+                    Thread.Sleep(13000);
                     CreateFileQueue();
                 }
 
-                Thread.Sleep(8000);
+                Thread.Sleep(4500);
             }
         }
     }

@@ -46,7 +46,7 @@ namespace PLCS_Project
             sensors = new SensorsHandler(usbHost, button);
 
             // Setup network
-            network = new Network(ethernetJ11D, wifiRS21);
+            network = new Network(ethernetJ11D);
 
             // Setup reader
             reader = new Reader(sensors);

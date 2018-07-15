@@ -28,6 +28,7 @@ namespace PLCS_Project
 
         private static void SetupTimeService()
         {
+            Thread.Sleep(10000);
             TimeServiceSettings settings = new TimeServiceSettings();
             TimeService.SystemTimeChanged += TimeService_SystemTimeChanged;
             TimeService.TimeSyncFailed += TimeService_TimeSyncFailed;

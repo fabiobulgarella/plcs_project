@@ -79,7 +79,7 @@ namespace PLCS_Project
             }
         }
 
-        public static void WriteFile(string fileName, byte[] data, bool flush = false)
+        public static bool WriteFile(string fileName, byte[] data, bool flush = false)
         {
             try
             {
@@ -87,14 +87,17 @@ namespace PLCS_Project
                 
                 if (flush)
                     sdCard.StorageDevice.Volume.FlushAll();
+
+                return true;
             }
             catch (Exception)
             {
                 Debug.Print("File not written");
+                return false;
             }
         }
 
-        public static void DeleteFile(string filePath, bool flush = false)
+        public static bool DeleteFile(string filePath, bool flush = false)
         {
             try
             {
@@ -102,10 +105,13 @@ namespace PLCS_Project
 
                 if (flush)
                     sdCard.StorageDevice.Volume.FlushAll();
+
+                return true;
             }
             catch (Exception)
             {
                 Debug.Print("File not deleted");
+                return false;
             }
         }
 
@@ -146,7 +152,7 @@ namespace PLCS_Project
                 {
                     long notSynchDate = long.Parse(fileName.Split('_')[1]);
                     long synchDate = notSynchDate + Time.FirstSyncTimeOffset;
-                    string newFileName = new DateTime(synchDate).ToString("yyyy-MM-ddTHH\\:mm\\:ss");
+                    string newFileName = new DateTime(synchDate).ToString("yyyyMMddTHHmmss");
                     byte[] unsynchFile = sdCard.StorageDevice.ReadFile(fileName);
                     byte[] synchFile = Json.ChangeTimestamps(unsynchFile, synchDate);
                     sdCard.StorageDevice.WriteFile(newFileName, synchFile);

@@ -33,6 +33,8 @@ namespace PLCS_Project
         public static double oldTempC, oldPressureMb, oldRelativeHumidity;
 
         private bool bme280Working = false;
+        private int lastWrittenX;
+        private int lastWrittenY;
 
         public SensorsHandler(USBHost usbHostObject, Button buttonObject)
         {
@@ -43,6 +45,7 @@ namespace PLCS_Project
             // Initialize old variables
             oldX = oldY = 0;
             oldTempC = oldPressureMb = oldPressureMb = 0;
+            lastWrittenX = lastWrittenY = 0;
 
             // Setup USBHost patched module and get mouse if already connected
             InitMouse();
@@ -184,7 +187,9 @@ namespace PLCS_Project
 
                 if (mouse != null)
                 {
-                    mouse.SetPosition(Int32.Parse(cordinates[0]), Int32.Parse(cordinates[1]));
+                    lastWrittenX = Int32.Parse(cordinates[0]);
+                    lastWrittenY = Int32.Parse(cordinates[1]);
+                    mouse.SetPosition(lastWrittenX, lastWrittenY);
                 }
             }
 
@@ -248,8 +253,23 @@ namespace PLCS_Project
         {
             if (mouse != null)
             {
-                String mouseData = Mouse.X + " " + Mouse.Y;
-                SDMemoryCard.WriteFile("MouseData", Encoding.UTF8.GetBytes(mouseData), true);
+                int x = Mouse.X;
+                int y = Mouse.Y;
+
+                if (x != lastWrittenX || y != lastWrittenY)
+                {
+                    String mouseData = x + " " + y;
+
+                    if (!SDMemoryCard.WriteFile("MouseData", Encoding.UTF8.GetBytes(mouseData), true))
+                    {
+                        Debug.Print("ERROR while saving MouseData!");
+                    }
+                    else
+                    {
+                        lastWrittenX = x;
+                        lastWrittenY = y;
+                    }
+                }
             }
         }
 

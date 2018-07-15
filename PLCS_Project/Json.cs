@@ -47,13 +47,13 @@ namespace PLCS_Project
         public static byte[] CreateJsonMeasurements(String x, String y, double tempC, double pressureMb, double relativeHumidity)
         {
             measureTimeTicks = DateTime.UtcNow.Ticks;
-            measureTime = new DateTime(measureTimeTicks).ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00");
+            measureTime = new DateTime(measureTimeTicks).ToString("yyyy-MM-ddTHH:mm:ss" + "+00:00");
 
             StringBuilder jsonString = new StringBuilder();
             jsonString.Append("{ \"version\": " + version);
             jsonString.Append(", \"device_id\": \"" + device_id);
             jsonString.Append("\", \"iso_timestamp\": \"" + measureTime);
-            jsonString.Append("\", \"measurements\": [");
+            jsonString.Append("\", \"measurements\": [ ");
 
             // Displacement X measurement
             if (x != null)
@@ -145,7 +145,7 @@ namespace PLCS_Project
 
         public static byte[] ChangeTimestamps(byte[] data, long newTimestamp)
         {
-            String newMeasureTime = new DateTime(newTimestamp).ToString("yyyy-MM-ddTHH\\:mm\\:ss" + "+00:00");
+            String newMeasureTime = new DateTime(newTimestamp).ToString("yyyy-MM-ddTHH:mm:ss" + "+00:00");
             StringBuilder newJson = new StringBuilder();
             String oldJson = new String(Encoding.UTF8.GetChars(data));
 
