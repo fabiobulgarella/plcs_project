@@ -70,7 +70,7 @@ namespace PLCS_Project
                 catch (Exception)
                 {
                     ExceptionCounter++;
-                    //Debug.Print("Input Error: " + Controller.GetLastError().ToString());
+                    Debug.Print("Input Error: " + Controller.GetLastError().ToString());
                 }
 
                 if (bytesReceived == 7)

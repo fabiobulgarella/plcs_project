@@ -64,6 +64,7 @@ namespace PLCS_Project
                         if (result == 0)
                         {
                             mqttClient.Subscribe(new string[] { "FEZ49/acknowledgments" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+                            mqttClient.Publish("FEZ49/configuration", Json.CreateJsonConfiguration(), MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
 
                             Debug.Print("Mqtt connection successfully established!");
                             break;
