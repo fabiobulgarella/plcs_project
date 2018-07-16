@@ -88,6 +88,11 @@ namespace PLCS_Project
         void mqttClient_ConnectionClosed(object sender, EventArgs e)
         {
             Debug.Print("Mqtt connection closed. Trying to reconnect...");
+
+            // Clear waiting gateway ack tables
+            messageIdToFileMap.Clear();
+            waitingGatewayAckFiles.Clear();
+
             if (connectionThread == null || !connectionThread.IsAlive)
             {
                 connectionThread = new Thread(Connect);
@@ -162,7 +167,9 @@ namespace PLCS_Project
                 try
                 {
                     String fileName = (String)fileQueue.Dequeue();
-                    if (fileName == "MouseData") continue;
+
+                    // Check if current file is "MouseData"
+                    if (fileName.Length == 9) continue;
 
                     if (fileName.IndexOf("_") != -1)
                     {
