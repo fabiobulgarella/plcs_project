@@ -138,7 +138,7 @@ namespace PLCS_Project
             jsonString.Append("{ \"sensor_id\": " + sensorId);
             jsonString.Append(", \"iso_timestamp\": \"" + measureTime);
             jsonString.Append("\", \"value\": " + value);
-            jsonString.Append("\", \"status\": \"" + status + "\" }, ");
+            jsonString.Append(", \"status\": \"" + status + "\" }, ");
             
             return jsonString.ToString();
         }
