@@ -61,7 +61,7 @@ namespace PLCS_Project
                 String xJson;
 
                 if (x == "FAIL")
-                    xJson = CreateSingleJsonMeasurement(1, "", "FAIL");
+                    xJson = CreateSingleJsonMeasurement(1, "0", "FAIL");
                 else
                     xJson = CreateSingleJsonMeasurement(1, x, "OK");
                 
@@ -74,7 +74,7 @@ namespace PLCS_Project
                 String yJson;
 
                 if (y == "FAIL")
-                    yJson = CreateSingleJsonMeasurement(2, "", "FAIL");
+                    yJson = CreateSingleJsonMeasurement(2, "0", "FAIL");
                 else
                     yJson = CreateSingleJsonMeasurement(2, y, "OK");
 

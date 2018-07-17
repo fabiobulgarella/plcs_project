@@ -36,10 +36,7 @@ namespace PLCS_Project
             for (int i = 0; i < 5; i++)
             {
                 if (measuresNotChanged[i] == 14)
-                {
                     toForce[i] = true;
-                    measuresNotChanged[i] = 0;
-                }              
             }
 
             // Get measurements from sensors handler
@@ -51,7 +48,10 @@ namespace PLCS_Project
                 if (!m.changed[i])
                     measuresNotChanged[i]++;
                 else
+                {
+                    measuresNotChanged[i] = 0;
                     toSend = true;
+                }
             }
 
             // Produce JSON and write it on a file

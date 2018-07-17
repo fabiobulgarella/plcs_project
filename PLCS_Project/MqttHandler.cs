@@ -109,8 +109,13 @@ namespace PLCS_Project
 
             if (e.IsPublished)
             {
-                waitingAmazonAckFiles.Add(fileName);
-                Debug.Print("Message \"" + fileName + "\" published with ID -> " + e.MessageId);
+                if (fileName != null)
+                {
+                    waitingAmazonAckFiles.Add(fileName);
+                    Debug.Print("Message \"" + fileName + "\" published with ID -> " + e.MessageId);
+                }
+                else
+                    Debug.Print("Message \"configuration\" published with ID -> " + e.MessageId);
             }
         }
 

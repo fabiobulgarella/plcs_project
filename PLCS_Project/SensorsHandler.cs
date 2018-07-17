@@ -28,11 +28,14 @@ namespace PLCS_Project
         private Button button;
         private bool mouseFirstConnect;
 
-        public static int oldX, oldY;
-        public static double tempC, pressureMb, relativeHumidity;
-        public static double oldTempC, oldPressureMb, oldRelativeHumidity;
+        private int oldX, oldY;
+        private double tempC, pressureMb, relativeHumidity;
+        private double oldTempC, oldPressureMb, oldRelativeHumidity;
+        private bool wasMouseFailed;
+        private bool wasSensorFailed;
+        private bool isMouseConnected;
 
-        private bool bme280Working = false;
+        private bool bme280Working;
         private int lastWrittenX;
         private int lastWrittenY;
 
@@ -42,10 +45,13 @@ namespace PLCS_Project
             usbHost = usbHostObject;
             button = buttonObject;
 
-            // Initialize old variables
+            // Initialize variables
             oldX = oldY = 0;
             oldTempC = oldPressureMb = oldPressureMb = 0;
             lastWrittenX = lastWrittenY = 0;
+            wasMouseFailed = wasSensorFailed = true;
+            bme280Working = false;
+            isMouseConnected = false;
 
             // Setup USBHost patched module and get mouse if already connected
             InitMouse();
@@ -73,11 +79,11 @@ namespace PLCS_Project
             Measurements measurements;
             measurements.changed = new bool[5];
 
-            if (mouse != null)
+            if (mouse != null && isMouseConnected)
             {
                 // Get X position
                 int newX = Mouse.X;
-                if (newX != oldX || toForce[0])
+                if (newX != oldX || toForce[0] || wasMouseFailed)
                 {
                     oldX = newX;
                     measurements.x = Mouse.GetMillimetersX(newX);
@@ -88,7 +94,7 @@ namespace PLCS_Project
 
                 // Get Y position
                 int newY = Mouse.Y;
-                if (newY != oldY || toForce[1])
+                if (newY != oldY || toForce[1] || wasMouseFailed)
                 {
                     oldY = newY;
                     measurements.y = Mouse.GetMillimetersY(newY);
@@ -96,17 +102,31 @@ namespace PLCS_Project
                 }
                 else
                     measurements.y = null;
+
+                wasMouseFailed = false;
             }
             else
             {
-                measurements.x = "FAIL";
-                measurements.y = "FAIL";
+                if (toForce[0] || !wasMouseFailed)
+                {
+                    measurements.x = "FAIL";
+                    measurements.y = "FAIL";
+                    measurements.changed[0] = true;
+                    measurements.changed[1] = true;
+                }
+                else
+                {
+                    measurements.x = null;
+                    measurements.y = null;
+                }
+                
+                wasMouseFailed = true;
             }
 
             if (bme280Working)
             {
                 // Get Temperature
-                if (tempC != oldTempC || toForce[2])
+                if (tempC.ToString("F1") != oldTempC.ToString("F1") || toForce[2] || wasSensorFailed)
                 {
                     oldTempC = tempC;
                     measurements.temperature = tempC;
@@ -116,7 +136,7 @@ namespace PLCS_Project
                     measurements.temperature = -100;
 
                 // Get Pressure
-                if (pressureMb != oldPressureMb || toForce[3])
+                if (pressureMb.ToString("F1") != oldPressureMb.ToString("F1") || toForce[3] || wasSensorFailed)
                 {
                     oldPressureMb = pressureMb;
                     measurements.pressure = pressureMb;
@@ -126,7 +146,7 @@ namespace PLCS_Project
                     measurements.pressure = -100;
 
                 // Get Relative Humidity
-                if (relativeHumidity != oldRelativeHumidity || toForce[4])
+                if (relativeHumidity.ToString("F1") != oldRelativeHumidity.ToString("F1") || toForce[4] || wasSensorFailed)
                 {
                     oldRelativeHumidity = relativeHumidity;
                     measurements.humidity = relativeHumidity;
@@ -134,12 +154,28 @@ namespace PLCS_Project
                 }
                 else
                     measurements.humidity = -100;
+
+                wasSensorFailed = false;
             }
             else
             {
-                measurements.temperature = -102;
-                measurements.humidity = -102;
-                measurements.pressure = -102;
+                if (toForce[2] || !wasSensorFailed)
+                {
+                    measurements.temperature = -102;
+                    measurements.pressure = -102;
+                    measurements.humidity = -102;
+                    measurements.changed[2] = true;
+                    measurements.changed[3] = true;
+                    measurements.changed[4] = true;
+                }
+                else
+                {
+                    measurements.temperature = -100;
+                    measurements.pressure = -100;
+                    measurements.humidity = -100;
+                }
+
+                wasSensorFailed = true;
             }
 
             return measurements;
@@ -214,9 +250,9 @@ namespace PLCS_Project
             this.mouse.Disconnected += mouse_Disconnected;
 
             if (mouseFirstConnect)
-            {
                 LoadMouseData();
-            }
+
+            isMouseConnected = true;
 
             Debug.Print("Mouse Connected");
             Utils.TurnLedOn(1);
@@ -225,8 +261,9 @@ namespace PLCS_Project
 
         void mouse_Disconnected(BaseDevice sender, EventArgs e)
         {
+            isMouseConnected = false;
+
             Debug.Print("Mouse Disconnected");
-            Debug.Print("Connected devices -> " + Controller.GetConnectedDevices().Length);
             Utils.TurnLedOff(1);
             Display.UpdateMouseState(false);
         }
