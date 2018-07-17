@@ -36,9 +36,6 @@ namespace PLCS_Project
             // Setup sdcard            
             SDMemoryCard.SetSDcard(sdCard);
 
-            // Setup leds            
-            Utils.SetLedStrip(ledStrip);
-
             // Setup display
             Display.SetDisplay(displayTE35);
 

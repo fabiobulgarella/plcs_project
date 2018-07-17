@@ -51,7 +51,6 @@ namespace PLCS_Project
         private static void sdCard_Mounted(SDCard sender, GT.StorageDevice device)
         {
             Debug.Print("SDCard has been Mounted");
-            Utils.TurnLedOn(2);
             Display.UpdateSDState(true);
 
             // Delete unsynched files written before reboot
@@ -62,7 +61,6 @@ namespace PLCS_Project
         private static void sdCard_Unmounted(SDCard sender, EventArgs e)
         {
             Debug.Print("SDCard has been Unmounted");
-            Utils.TurnLedOff(2);
             Display.UpdateSDState(false);
         }
 

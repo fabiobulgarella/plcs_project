@@ -255,7 +255,6 @@ namespace PLCS_Project
             isMouseConnected = true;
 
             Debug.Print("Mouse Connected");
-            Utils.TurnLedOn(1);
             Display.UpdateMouseState(true);
         }
 
@@ -264,7 +263,6 @@ namespace PLCS_Project
             isMouseConnected = false;
 
             Debug.Print("Mouse Disconnected");
-            Utils.TurnLedOff(1);
             Display.UpdateMouseState(false);
         }
 
@@ -326,7 +324,6 @@ namespace PLCS_Project
                         AltitudeInMeters = 239
                     };
 
-                    Utils.TurnLedOn(0);
                     isNotActivated = false;
                 }
                 catch (BME280Exception)
@@ -356,7 +353,6 @@ namespace PLCS_Project
                 if (!bme280Working)
                 {
                     bme280Working = true;
-                    Utils.TurnLedOn(0);
                     Display.UpdateTPHState(true);
                     Debug.Print("Sensor connected");                    
                 }
@@ -365,7 +361,6 @@ namespace PLCS_Project
             catch (BME280Exception)
             {
                 bme280Working = false;
-                Utils.TurnLedOff(0);
                 Display.UpdateTPHState(false);
                 Debug.Print("Unable to read sensor data");
                 Debug.Print("Sensor disconnected");

@@ -18,16 +18,13 @@ namespace PLCS_Project {
         /// <summary>The USB Client EDP module using socket 1 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.USBClientEDP usbClientEDP;
         
-        /// <summary>The LED Strip module using socket 11 of the mainboard.</summary>
-        private Gadgeteer.Modules.GHIElectronics.LEDStrip ledStrip;
-        
         /// <summary>The Ethernet J11D module using socket 7 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.EthernetJ11D ethernetJ11D;
         
         /// <summary>The Display TE35 module using sockets 14, 13, 12 and 10 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.DisplayTE35 displayTE35;
         
-        /// <summary>The Button module using socket 6 of the mainboard.</summary>
+        /// <summary>The Button module using socket 8 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.Button button;
         
         /// <summary>The USB Host module using socket 3 of the mainboard.</summary>
@@ -59,10 +56,9 @@ namespace PLCS_Project {
         
         private void InitializeModules() {
             this.usbClientEDP = new GTM.GHIElectronics.USBClientEDP(1);
-            this.ledStrip = new GTM.GHIElectronics.LEDStrip(11);
             this.ethernetJ11D = new GTM.GHIElectronics.EthernetJ11D(7);
             this.displayTE35 = new GTM.GHIElectronics.DisplayTE35(14, 13, 12, 10);
-            this.button = new GTM.GHIElectronics.Button(6);
+            this.button = new GTM.GHIElectronics.Button(8);
             this.usbHost = new GTM.GHIElectronics.USBHost(3);
             this.sdCard = new GTM.GHIElectronics.SDCard(5);
         }
