@@ -25,7 +25,7 @@ namespace PLCS_Project
             display.SimpleGraphics.DisplayText("FEZ_49 Group", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 0);
             display.SimpleGraphics.DisplayText("TS", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 265, 0);
             display.SimpleGraphics.DisplayText("E", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 290, 0);
-            display.SimpleGraphics.DisplayText("W", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 305, 0);            
+            display.SimpleGraphics.DisplayText("M", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, 305, 0);            
             display.SimpleGraphics.Redraw();
         }
 
@@ -45,11 +45,11 @@ namespace PLCS_Project
             display.SimpleGraphics.Redraw();
         }
 
-        public static void UpdateWifiStatus(bool active)
+        public static void UpdateMqttStatus(bool active)
         {
             GT.Color color = active ? GT.Color.Green : GT.Color.Red;
             display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 305, 0, 15, 15);
-            display.SimpleGraphics.DisplayText("W", Resources.GetFont(Resources.FontResources.NinaB), color, 305, 0);
+            display.SimpleGraphics.DisplayText("M", Resources.GetFont(Resources.FontResources.NinaB), color, 305, 0);
             display.SimpleGraphics.Redraw();
         }
 

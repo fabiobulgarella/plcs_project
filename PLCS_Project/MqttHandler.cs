@@ -67,6 +67,7 @@ namespace PLCS_Project
                             mqttClient.Publish("FEZ49/configuration", Json.CreateJsonConfiguration(), MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
 
                             Debug.Print("Mqtt connection successfully established!");
+                            Display.UpdateMqttStatus(true);
                             break;
                         }
                         else
@@ -89,6 +90,7 @@ namespace PLCS_Project
         void mqttClient_ConnectionClosed(object sender, EventArgs e)
         {
             Debug.Print("Mqtt connection closed. Trying to reconnect...");
+            Display.UpdateMqttStatus(false);
 
             // Clear waiting gateway ack tables
             messageIdToFileMap.Clear();
@@ -170,55 +172,54 @@ namespace PLCS_Project
 
             while (true)
             {
-                try
+                Thread.Sleep(4500);
+
+                if (fileQueue.Count == 0)
                 {
-                    String fileName = (String)fileQueue.Dequeue();
+                    Thread.Sleep(25000);
+                    CreateFileQueue();
+                    continue;
+                }
 
-                    // Check if current file is "MouseData"
-                    if (fileName.Length == 9) continue;
+                String fileName = (String)fileQueue.Dequeue();
 
-                    if (fileName.IndexOf("_") != -1)
-                    {
-                        String newFileName = SDMemoryCard.RenameUnsynchedFile(fileName);
-                        if (newFileName != null)
-                            fileQueue.Enqueue(newFileName);
-                        else
-                            fileQueue.Enqueue(fileName);
+                // Check if current file is "MouseData"
+                if (fileName.Length == 9) continue;
 
-                        Thread.Sleep(200);
-                        continue;
-                    }
-
-                    if (waitingAmazonAckFiles.Contains(fileName) || waitingGatewayAckFiles.Contains(fileName))
-                    {
-                        Thread.Sleep(100);
-                        continue;
-                    }
-
-                    byte[] fileData = SDMemoryCard.ReadFile(fileName);
+                if (fileName.IndexOf("_") != -1)
+                {
+                    String newFileName = SDMemoryCard.RenameUnsynchedFile(fileName);
+                    if (newFileName != null)
+                        fileQueue.Enqueue(newFileName);
+                    else
+                        fileQueue.Enqueue(fileName);
 
                     Thread.Sleep(200);
+                    continue;
+                }
 
-                    if (fileData != null)
+                if (waitingAmazonAckFiles.Contains(fileName) || waitingGatewayAckFiles.Contains(fileName))
+                {
+                    Thread.Sleep(100);
+                    continue;
+                }
+
+                byte[] fileData = SDMemoryCard.ReadFile(fileName);
+
+                Thread.Sleep(200);
+
+                if (fileData != null)
+                {
+                    ushort messageId = PublishMessage(fileData);
+
+                    if (messageId == 0)
+                        fileQueue.Enqueue(fileName);
+                    else
                     {
-                        ushort messageId = PublishMessage(fileData);
-                        
-                        if (messageId == 0)
-                            fileQueue.Enqueue(fileName);
-                        else
-                        {
-                            messageIdToFileMap.Add(messageId, fileName);
-                            waitingGatewayAckFiles.Add(fileName);
-                        }
+                        messageIdToFileMap.Add(messageId, fileName);
+                        waitingGatewayAckFiles.Add(fileName);
                     }
                 }
-                catch (Exception)
-                {
-                    Thread.Sleep(13000);
-                    CreateFileQueue();
-                }
-
-                Thread.Sleep(4500);
             }
         }
     }
