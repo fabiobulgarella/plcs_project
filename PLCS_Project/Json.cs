@@ -38,7 +38,7 @@ namespace PLCS_Project
             jsonString.Append("\", \"location\": \"" + project_location);
             jsonString.Append("\", \"latitude\": " + project_latitude);
             jsonString.Append(", \"longitude\": " + project_longitude);
-            jsonString.Append(", \"internal\": " + project_internal);
+            jsonString.Append(", \"internal\": true");
             jsonString.Append(" }");
 
             return Encoding.UTF8.GetBytes(jsonString.ToString());
