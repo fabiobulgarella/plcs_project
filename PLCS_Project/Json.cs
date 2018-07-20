@@ -8,7 +8,7 @@ namespace PLCS_Project
     {
         private const String version = "2";
         private const String device_id = "FEZ_49";
-        private const String project_name = "Fissure monitoring";
+        private const String project_name = "Fissure Monitoring";
         private const String project_group = "FEZ 49";
         private const String project_type = "fissure";
         private const String project_description = "Sensors to measure fissure movements in both direction";
