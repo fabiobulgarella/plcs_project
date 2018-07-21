@@ -48,6 +48,18 @@ namespace PLCS_Project
             mqttClient.ConnectionClosed += mqttClient_ConnectionClosed;
         }
 
+        private void RestartClient()
+        {
+            // Remove older listener
+            mqttClient.MqttMsgPublishReceived -= mqttClient_MqttMsgPublishReceived;
+            mqttClient.MqttMsgPublished -= mqttClient_MqttMsgPublished;
+            mqttClient.ConnectionClosed -= mqttClient_ConnectionClosed;
+            mqttClient = null;
+
+            // Reinit client
+            InitClient();
+        }
+
         private void Connect()
         {
             while (true)
@@ -95,6 +107,10 @@ namespace PLCS_Project
             // Clear waiting gateway ack tables
             messageIdToFileMap.Clear();
             waitingGatewayAckFiles.Clear();
+            waitingAmazonAckFiles.Clear();
+
+            // Reset mqttClient
+            RestartClient();
 
             if (connectionThread == null || !connectionThread.IsAlive)
             {
@@ -176,7 +192,7 @@ namespace PLCS_Project
 
                 if (fileQueue.Count == 0)
                 {
-                    Thread.Sleep(25000);
+                    Thread.Sleep(30000);
                     CreateFileQueue();
                     continue;
                 }

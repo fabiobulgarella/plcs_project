@@ -18,7 +18,7 @@ namespace PLCS_Project
             measuresNotChanged = new int[5];
             
             // Writing Timer
-            GT.Timer writingTimer = new GT.Timer(30000);
+            GT.Timer writingTimer = new GT.Timer(120000);
             writingTimer.Tick += writingTimer_Tick;
             writingTimer.Start();
         }
