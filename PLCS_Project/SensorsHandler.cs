@@ -28,7 +28,7 @@ namespace PLCS_Project
         private Button button;
         private bool mouseFirstConnect;
 
-        private int oldX, oldY;
+        private String oldX, oldY;
         private double tempC, pressureMb, relativeHumidity;
         private double oldTempC, oldPressureMb, oldRelativeHumidity;
         private bool wasMouseFailed;
@@ -46,7 +46,7 @@ namespace PLCS_Project
             button = buttonObject;
 
             // Initialize variables
-            oldX = oldY = 0;
+            oldX = oldY = "";
             oldTempC = oldPressureMb = oldPressureMb = 0;
             lastWrittenX = lastWrittenY = 0;
             wasMouseFailed = wasSensorFailed = true;
@@ -82,22 +82,22 @@ namespace PLCS_Project
             if (mouse != null && isMouseConnected)
             {
                 // Get X position
-                int newX = Mouse.X;
+                String newX = Mouse.GetMillimetersX(Mouse.X);
                 if (newX != oldX || toForce[0] || wasMouseFailed)
                 {
                     oldX = newX;
-                    measurements.x = Mouse.GetMillimetersX(newX);
+                    measurements.x = newX;
                     measurements.changed[0] = true;
                 }
                 else
                     measurements.x = null;
 
                 // Get Y position
-                int newY = Mouse.Y;
+                String newY = Mouse.GetMillimetersY(Mouse.Y);
                 if (newY != oldY || toForce[1] || wasMouseFailed)
                 {
                     oldY = newY;
-                    measurements.y = Mouse.GetMillimetersY(newY);
+                    measurements.y = newY;
                     measurements.changed[1] = true;
                 }
                 else

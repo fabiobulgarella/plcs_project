@@ -12,8 +12,6 @@ namespace PLCS_Project
     class MqttHandler
     {
         private const String MQTT_BROKER_ADDRESS = "192.168.137.1";
-        private const String USERNAME = "fez49";
-        private const String PASSWORD = "abcd12345";
         
         private MqttClient mqttClient;
         private Thread connectionThread;
@@ -70,7 +68,7 @@ namespace PLCS_Project
 
                     try
                     {
-                        byte result = mqttClient.Connect(clientId, USERNAME, PASSWORD);
+                        byte result = mqttClient.Connect(clientId);
 
                         // Check if successfully connected
                         if (result == 0)
