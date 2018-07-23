@@ -13,8 +13,8 @@ namespace PLCS_Project
         private const String project_type = "fissure";
         private const String project_description = "Sensors to measure fissure movements in both direction";
         private const String project_location = "Politecnico di Torino";
-        private const double project_latitude = 45.058120;
-        private const double project_longitude = 7.691776;
+        private const double project_latitude = 45.0717287;
+        private const double project_longitude = 7.6861214;
         private const bool project_internal = true;
 
         private static String measureTime;
