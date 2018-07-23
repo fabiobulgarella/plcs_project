@@ -71,7 +71,7 @@ namespace PLCS_Project
             display.SimpleGraphics.DisplayRectangle(GT.Color.Black, 0, GT.Color.Black, 0, 72, 320, 54);
             display.SimpleGraphics.DisplayText(position, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 72);
             display.SimpleGraphics.DisplayText(millimetersPosition, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 90);
-            display.SimpleGraphics.DisplayText(toPrint, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 108);
+            //display.SimpleGraphics.DisplayText(toPrint, Resources.GetFont(Resources.FontResources.NinaB), GT.Color.LightGray, 0, 108);
             display.SimpleGraphics.Redraw();
         }
 
